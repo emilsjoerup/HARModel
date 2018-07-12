@@ -17,13 +17,14 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
   } # end negative conditional
   #Initialization
   mForecast = matrix(0 , iNAhead , ncol = iNRoll+1) 
-  vObservations =vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll)]  
+  vObservations =vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll-1)]  
   vForecastComp = vRealizedmeasure[(length(vRealizedmeasure)-iNRoll):length(vRealizedmeasure)]
+  
   iLagsMax = max(vLags)
   
   if(iNAhead ==1 && iNRoll==0){
     #Produces only 1 forecast.
-    mData = HARDataCreationC(vRealizedmeasure[1:length(vRealizedmeasure)] , vLags) # Initialization of data to be used for forecasting
+    mData = HARDataCreationC(vRealizedmeasure[1:(length(vRealizedmeasure)-1)] , vLags) # Initialization of data to be used for forecasting
     coef = HARestimate(vRealizedmeasure[1:length(vRealizedmeasure)] , vLags , bPlots =F , bStandardErrors = F)$coef
     mForecast[1,1] = coef[1] + sum(coef[2:length(coef)]*tail(mData,1)[2:length(mData[1,])])
     lModel = HARestimate(vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll)],vLags)
@@ -34,7 +35,7 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
   }
   if(iNAhead == 1){
     for (j in 1:(iNRoll+1)) {
-      mData = HARDataCreationC(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags) # Initialization of data to be used for forecasting.
+      mData = HARDataCreationC(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j-1)] , vLags) # Initialization of data to be used for forecasting.
       
       # Above makes sure the length of the model stays the same and that for each "roll" the nex period of data is used.
       coef = HARestimate(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags , bPlots =F , bStandardErrors = F)$coef
@@ -46,7 +47,7 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
   else{
     mForecast = matrix(0 , iNAhead+1 , ncol = iNRoll+1) #Initialization
     for (j in 1:(iNRoll+1)) {
-      mData = HARDataCreationC(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags)
+      mData = HARDataCreationC(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j-1)] , vLags)
       coef = HARestimate(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags , bPlots =F , bStandardErrors = F)$coef
       
       mForecast[1,j] = coef[1] + sum(coef[2:length(coef)]*tail(mData,1)[2:length(mData[1,])])
