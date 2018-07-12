@@ -89,28 +89,3 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
   lModel$vForeccastComp = vForecastComp
     return(lModel)
 }
-#     
-# HARforecastC = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 ){
-#   if (class(vRealizedmeasure)[1] == "xts" ) {
-#      print("xts is unfortunately not supported yet. The realized measure is passed using the as.vector() function.")
-#      vRealizedmeasure = as.vector(vRealizedmeasure)
-#      }
-#    if(any(vRealizedmeasure<0)){
-#    stop("The realized measure cannot be negative. Something is wrong.")
-#    }
-#     vObservations =vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll)]  
-#     vForecastComp = vRealizedmeasure[(length(vRealizedmeasure)-iNRoll):length(vRealizedmeasure)]
-#     iLagsMax = max(vLags)
-#     mForecast = matrix(0 , iNAhead , ncol = iNRoll)
-#   for (j in 1:iNRoll) {
-#       browser()
-#       vCoef = HARestimate(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags , bPlots =F , bStandardErrors = F)$coef
-#       
-#       mTest = HarForecastLoopingC(vRealizedmeasure[(length(vRealizedmeasure)-max(vLags) - iNRoll + j) : (length(vRealizedmeasure) -iNRoll + j)] , vLags , vCoef ,iNRoll, iNAhead , j)
-#       
-#       
-#       #mForecast[1:iNAhead,j] = HarForecastLoopingC(vRealizedmeasure[j:(length(vRealizedmeasure)-iNRoll+j)] , vLags , vCoef ,iNRoll, iNAhead , j)
-#       }
-#       return(list("Forecast-matrix" = mForecast , "Model" = HARestimate(vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll)] , vLags)$model))
-# }
-#     
