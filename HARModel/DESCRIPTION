@@ -3,9 +3,9 @@ Type: Package
 Title: Estimation and forecasting using the HAR-RV model form Corsi(2009)
 Version: 1.0
 Date: 2018-07-12
-Author: Emil Sjørup
-Maintainer: emilsjoerup@live.dk
+Author: Emil Sjoerup
+Maintainer: Emil Sjoerup <emilsjoerup@live.dk>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-Imports: Rcpp (>= 0.12.17)
+Imports: Rcpp (>= 0.12.17) , xts, zoo, sandwich
 LinkingTo: Rcpp, RcppArmadillo
