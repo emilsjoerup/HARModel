@@ -5,6 +5,12 @@
 ########################################################################################################
 
 HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlots = F , iPlotForecastAhead=1 , sLegendPlacement = "topleft"){
+  #Initialization
+  mForecast = matrix(0 , iNAhead , ncol = iNRoll+1) 
+  vObservations =vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll-1)]  
+  vForecastComp = vRealizedmeasure[(length(vRealizedmeasure)-iNRoll):length(vRealizedmeasure)]
+  vNames = 1:(iNRoll+1)
+  iLagsMax = max(vLags)
   if(iNRoll > length(vRealizedmeasure)){
     stop("The amount of rolling forecasts cannot be greater than the length of the Realized measure vector.")
   }
@@ -15,12 +21,7 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
   if(any(vRealizedmeasure<0)){
     stop("The realized measure cannot be negative. Something is wrong.")
   } # end negative conditional
-  #Initialization
-  mForecast = matrix(0 , iNAhead , ncol = iNRoll+1) 
-  vObservations =vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll-1)]  
-  vForecastComp = vRealizedmeasure[(length(vRealizedmeasure)-iNRoll):length(vRealizedmeasure)]
-  
-  iLagsMax = max(vLags)
+
   
   if(iNAhead ==1 && iNRoll==0){
     #Produces only 1 forecast.
@@ -80,13 +81,14 @@ HARforecast = function( vRealizedmeasure , vLags , iNRoll=1 , iNAhead=10 , bPlot
     } #end for-loop
    }# End forecasting
   if(bPlots){
-    plot(vForecastComp   , type="l" , ylab = "Realized Volatility" , xlab = "Periods ahead")
-    lines(mForecast[iPlotForecastAhead,] , col =2)
-    legend(sLegendPlacement , legend = c("Observed (out of sample)" , "Forecasted") , lty = c(1,1)  , col = c(1,2) , box.lty = 0 , inset = c(0.005 , 0.005))
+    print(plot(cbind(vForecastComp,mForecast[iPlotForecastAhead,])   , type="l" , main="Observed vs. forecasted", ylab = "Realized Volatility" , xlab = "Periods ahead"))
+    print(addLegend(sLegendPlacement, on=1, legend.names= c("Observed (out of sample) " , "Forecasted") , col = c(1,2) , lty=c(1,1) , lwd=c(2,2)))
   } # end plot conditional
+  
   lModel = HARestimate(vRealizedmeasure[1:(length(vRealizedmeasure)-iNRoll)],vLags)
-  lModel$Forecastmatrix = mForecast
+  lModel$Forecastmatrix = as.data.frame(mForecast)
+  names(lModel$Forecastmatrix) = paste("roll" , vNames)
   lModel$Observations = vObservations
   lModel$vForeccastComp = vForecastComp
-    return(lModel)
+  return(lModel)
 }
