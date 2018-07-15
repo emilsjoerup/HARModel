@@ -1,3 +1,6 @@
 useDynLib(HARModel, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom(zoo, index)
+importFrom(xts, xts , addLegend)
+importFrom(utils, tail)
 exportPattern("^[[:alpha:]]+")
