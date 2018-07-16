@@ -8,4 +8,7 @@ emilsjoerup@live.dk
 
 
 TODO:
-Add support for xts objects in the forecasting routine
+
+1: ADD a simulation routine.
+
+2: Improve speed of forecasting routine (hopefully by writing it in C++)
