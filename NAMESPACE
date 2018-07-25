@@ -1,0 +1,10 @@
+useDynLib(HARModel, .registration=TRUE)
+importFrom(Rcpp, evalCpp)
+importFrom(zoo, index)
+importFrom(xts, xts , addLegend)
+importFrom(utils, tail)
+importFrom("grDevices", "dev.interactive")
+importFrom("graphics", "panel.smooth", "par", "plot", "points")
+importFrom("stats", "lm", "residuals", "rnorm")
+
+exportPattern("^[[:alpha:]]+")
