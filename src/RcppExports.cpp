@@ -21,8 +21,6 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
-    {"_HARModel_HarForecastLoopingC", (DL_FUNC) &_HARModel_HarForecastLoopingC, 6},
-    {"_HARModel_RVsim", (DL_FUNC) &_HARModel_RVsim, 4},
     {NULL, NULL, 0}
 };
 
