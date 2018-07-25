@@ -18,36 +18,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// HarForecastLoopingC
-NumericVector HarForecastLoopingC(NumericVector vRealizedmeasure, NumericVector vLags, NumericVector vCoef, int iNRoll, int iNAhead, int j);
-RcppExport SEXP _HARModel_HarForecastLoopingC(SEXP vRealizedmeasureSEXP, SEXP vLagsSEXP, SEXP vCoefSEXP, SEXP iNRollSEXP, SEXP iNAheadSEXP, SEXP jSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type vRealizedmeasure(vRealizedmeasureSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vLags(vLagsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vCoef(vCoefSEXP);
-    Rcpp::traits::input_parameter< int >::type iNRoll(iNRollSEXP);
-    Rcpp::traits::input_parameter< int >::type iNAhead(iNAheadSEXP);
-    Rcpp::traits::input_parameter< int >::type j(jSEXP);
-    rcpp_result_gen = Rcpp::wrap(HarForecastLoopingC(vRealizedmeasure, vLags, vCoef, iNRoll, iNAhead, j));
-    return rcpp_result_gen;
-END_RCPP
-}
-// RVsim
-NumericVector RVsim(int iTradesPerSamplingPeriod, int iAggregationPeriods, double dMu, double dSigma2);
-RcppExport SEXP _HARModel_RVsim(SEXP iTradesPerSamplingPeriodSEXP, SEXP iAggregationPeriodsSEXP, SEXP dMuSEXP, SEXP dSigma2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type iTradesPerSamplingPeriod(iTradesPerSamplingPeriodSEXP);
-    Rcpp::traits::input_parameter< int >::type iAggregationPeriods(iAggregationPeriodsSEXP);
-    Rcpp::traits::input_parameter< double >::type dMu(dMuSEXP);
-    Rcpp::traits::input_parameter< double >::type dSigma2(dSigma2SEXP);
-    rcpp_result_gen = Rcpp::wrap(RVsim(iTradesPerSamplingPeriod, iAggregationPeriods, dMu, dSigma2));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
