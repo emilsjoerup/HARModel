@@ -21,7 +21,15 @@ The DESCRIPTION file:
 Maintainer: \packageMaintainer{HARModel}
 }
 \references{
-~~ Literature or other references for background information ~~
+@article{Corsi2009,
+author = {Corsi, Fulvio},
+doi = {10.1093/jjfinec/nbp001},
+issn = {14798409},
+journal = {Journal of Financial Econometrics},
+title = {{A simple approximate long-memory model of realized volatility}},
+volume = {7},
+year = {2009}
+}
 }
 ~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }
