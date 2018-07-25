@@ -13,6 +13,9 @@ TODO:
 
 2: Improve speed of forecasting routine (hopefully by writing it in C++)
 
+3: More sensible naming
+
+
 Known bug(s):
 
 1: Pressing the expand button on the Observations and vForecastComp vectors in a HARforecast object provides an error I can't seem to figure out. Luckily the vectors are accessible through `HARforecast$Observations` and `HARforecast$vForecastComp` respectively.
