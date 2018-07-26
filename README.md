@@ -11,9 +11,7 @@ TODO:
 
 1: ADD a simulation routine.
 
-2: Improve speed of forecasting routine (hopefully by writing it in C++)
-
-3: More sensible naming
+2: More sensible naming
 
 
 Known bug(s):
