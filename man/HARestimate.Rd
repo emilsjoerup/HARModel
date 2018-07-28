@@ -7,7 +7,7 @@ HAR estimation
 This function does HAR estimation in line with Corsi(2009). It is important to note that the maximum of the lag vector (22 in the standard case) observations are omitted because these are used to generate the data.
 }
 \usage{
-HARestimate(vRealizedMeasure, vLags, bStandardErrors = T, iLagSE = 5)
+HARestimate(vRealizedMeasure, vLags, iLagSE = 5)
 }
 \arguments{
   \item{vRealizedMeasure}{

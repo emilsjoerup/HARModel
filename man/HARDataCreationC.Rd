@@ -19,7 +19,7 @@ A vector denoting which lags should be used in the creation \code{c(1,5,22)} is 
 }
 }
 \details{
-The first \code{max(vLags)} rows contain NA's. Written in C++ for speed.
+None for now.
 }
 \value{
 A matrix containing the data used for HAR estimation or forecasting.
