@@ -18,26 +18,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// HarForecastLoopingC
-NumericVector HarForecastLoopingC(NumericVector vRealizedmeasure, NumericVector vLags, NumericVector vCoef, int iNRoll, int iNAhead, int j);
-RcppExport SEXP _HARModel_HarForecastLoopingC(SEXP vRealizedmeasureSEXP, SEXP vLagsSEXP, SEXP vCoefSEXP, SEXP iNRollSEXP, SEXP iNAheadSEXP, SEXP jSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type vRealizedmeasure(vRealizedmeasureSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vLags(vLagsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vCoef(vCoefSEXP);
-    Rcpp::traits::input_parameter< int >::type iNRoll(iNRollSEXP);
-    Rcpp::traits::input_parameter< int >::type iNAhead(iNAheadSEXP);
-    Rcpp::traits::input_parameter< int >::type j(jSEXP);
-    rcpp_result_gen = Rcpp::wrap(HarForecastLoopingC(vRealizedmeasure, vLags, vCoef, iNRoll, iNAhead, j));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
-    {"_HARModel_HarForecastLoopingC", (DL_FUNC) &_HARModel_HarForecastLoopingC, 6},
     {NULL, NULL, 0}
 };
 
