@@ -11,8 +11,6 @@ TODO:
 
 1: ADD a simulation routine.
 
-2: More sensible naming
-
 
 Known bug(s):
 
