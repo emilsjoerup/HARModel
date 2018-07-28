@@ -50,6 +50,7 @@ setMethod("plot.HARmodel" , signature(object = "HARmodel"), function(object){
   vObservations = xts(vObservations, order.by=vDates)
   vFittedValues   = xts(vFittedValues, order.by=vDates)
   g_range = range(vFittedValues,vObservations)
+  
   g_range[1] = 0.95*g_range[1] 
   g_range[2]= 1.05 * g_range[2] 
   title = paste("Observed and forecasted RV based on HAR Model:")
@@ -59,11 +60,6 @@ setMethod("plot.HARmodel" , signature(object = "HARmodel"), function(object){
             lty=c(2, 1), lwd=c(2, 2),
             col=c(1:2))
 })
-
-
-
-
-
 
 
 plot.HARforecast = function(object){
@@ -78,7 +74,6 @@ setMethod("plot.HARforecast" , signature(object = "HARforecast")  , function(obj
   vDatesiNAhead = tail(object$ForecastDates, iNAhead)
   vRollingForecastplot = t(as.vector(object$ForecastMatrix[1,]))
   vRollingForecastplot = xts(vRollingForecastplot , order.by = vDatesRoll)
-  
   vForecastResiduals = vRollingForecastplot - object$vForecastComp
   vINAheadForecastplot = as.vector(object$ForecastMatrix[,1])
   

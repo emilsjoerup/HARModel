@@ -10,8 +10,11 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
   iLags = length(vLags)
   iLagsPlusOne = iLags+1
   iLagsMax = max(vLags)
-  vObservations =vRealizedMeasure[iLagsMax:(iT-iNRoll-1)]  
-  vForecastComp = vRealizedMeasure[(iT-iNRoll):iT]
+  #vAllDates = index(vRealizedMeasure) # Will be used in some sort of fix of the
+  #names bug in the list output. Don't know how to do it yet
+  vObservations = vRealizedMeasure[iLagsMax:(iT-iNRoll)]
+
+  vForecastComp = vRealizedMeasure[(iT-iNRoll+1):iT]
   ######Initialization end    #######
   ######Checks section #######
   if(iNRoll > length(vRealizedMeasure)){
@@ -59,7 +62,7 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
       vCoef = FASTHARestimate(vRealizedMeasure[j:(iT-iNRoll+j)] , vLags , iLagsPlusOne)
       #Creates the j'th 1-step ahead forecast
       mForecast[1,j] = vCoef[1] + sum(vCoef[2:iLagsPlusOne]*tail(mData,1)[2:iLagsPlusOne])
-      for (i in 2:(min(iLagsMax, iNAhead)+1)) {
+      for (i in 2:(min((iLagsMax+1), iNAhead))) {
         
         vForecastfoo = c(vRealizedMeasure[(iT - max(vLags) - (iNRoll) + (i)): (iT - (iNRoll))] , mForecast[1:i , j]) 
         
