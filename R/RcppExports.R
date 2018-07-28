@@ -5,3 +5,7 @@ HARDataCreationC <- function(vRealizedmeasure, vLags) {
     .Call(`_HARModel_HARDataCreationC`, vRealizedmeasure, vLags)
 }
 
+HarForecastLoopingC <- function(vRealizedmeasure, vLags, vCoef, iNRoll, iNAhead, j) {
+    .Call(`_HARModel_HarForecastLoopingC`, vRealizedmeasure, vLags, vCoef, iNRoll, iNAhead, j)
+}
+

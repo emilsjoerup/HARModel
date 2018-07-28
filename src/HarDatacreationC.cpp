@@ -26,3 +26,5 @@ NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure , arma::vec vLags)
  
   return(mHarData);
 }
+
+
