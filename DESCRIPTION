@@ -9,3 +9,4 @@ Description: Estimation and (fast) forecasting using the HAR-RV model from Corsi
 License: GPL-3
 Imports: Rcpp (>= 0.12.17) , xts, zoo, sandwich
 LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 6.1.0

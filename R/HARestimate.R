@@ -6,33 +6,43 @@
 
 
 
-HARestimate = function(vRealizedMeasure , vLags = c(1,5,22),iLagSE = 5){
+HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), iLagSE = 5 , show=TRUE){
   ######Initialization and preparing data ######
   iLags = length(vLags)
   iT = length(vRealizedMeasure)
-  vDates = index(vRealizedMeasure)
-  vDates = vDates[(max(vLags)+1):iT]
+
   mData = HARDataCreationC(vRealizedMeasure, vLags)
   ######Initialization and data preparation end#
   
   ##### Estimate ######
-  lModel = lm(mData[,1] ~ mData[,2:(iLags+1)])
   
-  mVarCovar = sandwich::NeweyWest(lModel , lag = iLagSE)
+  Model = lm(mData[,1] ~ mData[,2:(iLags+1)])
+  
+  mVarCovar = sandwich::NeweyWest(Model , lag = iLagSE)
   ##### Estimation end#
   
-  lModel$mVarCovar = mVarCovar
-  lModel$NWLagOrder = iLagSE
-  names(lModel$coefficients) = paste("beta", 0:iLags , sep="")
-  lModel$terms = list("RV" , "=", "c", paste("RV" , vLags[1:iLags] , sep=""))
-  lModel$dates = vDates
-  class(lModel) = c("HARmodel" , "lm")
-  return(lModel)
+  Model$mVarCovar = mVarCovar #Maybe put in INFO
+  Info = list("NWLagOrder" = iLagSE , "Lags" = vLags)
+  Info$NWLagOrder = iLagSE
+  Info$Lags = vLags
+  
+  names(Model$coefficients) = paste("beta", 0:iLags , sep="")
+  colnames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
+  rownames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
+  if(is(vRealizedMeasure,"xts")){
+    vDates = index(vRealizedMeasure)
+    vDates = vDates[(max(vLags)+1):iT]
+    Info$Dates = vDates
+  }
+  HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , "Data" = list(vRealizedMeasure[(max(vLags)+1) : length(vRealizedMeasure)]))
+  
+  if(show){show(HARModel)}
+  return(HARModel)
   
 }
 
 
-#######Fast estimation routine which returns only the coefficients, it is used for forecasting and cuts down the time a bit.
+#######Fast estimation routine which returns only the coefficients, it is used for forecasting and cuts down the time a lot.
 #######This function is NOT user-callable######
 #######iLagsPlusOne is calculated in the forecasting initialization so it can be done once isn't done every roll.
 FASTHARestimate = function(vRealizedMeasure , vLags , iLagsPlusOne){

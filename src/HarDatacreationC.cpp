@@ -8,14 +8,17 @@ NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure , arma::vec vLags)
   int iT = vRealizedmeasure.size();
   int iLags = vLags.size();
   int iMaxLags = max(vLags);
-  //double dData;
   Rcpp::NumericMatrix  mHarData(iT - max(vLags) , iLags+1);
   
   for(int i=0; i<iLags; i++){
+    if(vLags[i] == 1){
+      mHarData(_,(i+1)) = vRealizedmeasure[Range((iMaxLags-1) , (iT-1))];
+      i++;
+    }
     for(int j=0; j<iT-max(vLags); j++){
     
      
-     // std::cout<<vLags[i]<<endl;
+     
       mHarData(j,(i+1)) = sum(vRealizedmeasure[Range(iMaxLags+(j) -vLags[i], iMaxLags+(j) -1)])/ vLags[i];
       
     

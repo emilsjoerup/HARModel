@@ -5,6 +5,7 @@
 ########################################################################################################
 
 HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
+  start.time = Sys.time()
   ######Initialization section ######
   iT = length(vRealizedMeasure)
   iLags = length(vLags)
@@ -12,7 +13,7 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
   iLagsMax = max(vLags)
   #vAllDates = index(vRealizedMeasure) # Will be used in some sort of fix of the
   #names bug in the list output. Don't know how to do it yet
-  vObservations = vRealizedMeasure[iLagsMax:(iT-iNRoll)]
+  vObservations = vRealizedMeasure[(iLagsMax+1):(iT-iNRoll)]
 
   vForecastComp = vRealizedMeasure[(iT-iNRoll+1):iT]
   ######Initialization end    #######
@@ -62,7 +63,7 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
       vCoef = FASTHARestimate(vRealizedMeasure[j:(iT-iNRoll+j)] , vLags , iLagsPlusOne)
       #Creates the j'th 1-step ahead forecast
       mForecast[1,j] = vCoef[1] + sum(vCoef[2:iLagsPlusOne]*tail(mData,1)[2:iLagsPlusOne])
-      for (i in 2:(min((iLagsMax+1), iNAhead))) {
+      for (i in 2:(min((iLagsMax), iNAhead))) {
         
         vForecastfoo = c(vRealizedMeasure[(iT - max(vLags) - (iNRoll) + (i)): (iT - (iNRoll))] , mForecast[1:i , j]) 
         
@@ -78,6 +79,7 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
           vForecastfoo = mForecast[(i-iLagsMax):i , j] ## Fix so the size stays the same.
           
           vLastrowdatafoo = HARDataCreationC(vForecastfoo , vLags)
+          
           #Gets the data necessary to form the forecast in one vector.
           mForecast[i,j] = sum(vCoef*vLastrowdatafoo)
           #Creates the j'th i-step ahead forecast
@@ -86,13 +88,12 @@ HARforecast = function(vRealizedMeasure , vLags , iNRoll=10 , iNAhead=10){
     } #end for-loop
   }
   ######Forecasting end #######
-  
-  lModel = HARestimate(vRealizedMeasure[1:(iT-iNRoll)],vLags, iLagSE = 5)
-  lModel$ForecastMatrix = as.data.frame(mForecast)
-  names(lModel$ForecastMatrix) = paste("roll" , 1:iNRoll)
-  lModel$ForecastDates = index(vForecastComp)
-  lModel$Observations = vObservations
-  lModel$vForecastComp = vForecastComp
-  class(lModel) = "HARforecast"
-  return(lModel)
+  ElapsedTime = Sys.time() - start.time
+ # lModel = list("Model" = NA , "Forecast" = as.data.frame(mForecast), "Info" = list("ElapsedTime" =ElapsedTime , "Rolls" = iNRoll ,"Horizon" = iNAhead),"Data" = list( "ForecastDates" = index(vForecastComp), "Observations" = vObservations , "ForecastComparison" = vForecastComp ))
+  #lModel$Model = HARestimate(vRealizedMeasure[1:(iT-iNRoll)],vLags, iLagSE = 5 , show=F)
+  #names(lModel$Forecast) = paste("roll" , 1:iNRoll)
+  HARForecast = new("HARForecast" , "Model" = HARestimate(vRealizedMeasure[1:(iT-iNRoll)],vLags, iLagSE = 5 , show=F) , "Forecast" =as.data.frame(mForecast), "Info" = list("ElapsedTime" =ElapsedTime , "Rolls" = iNRoll ,"Horizon" = iNAhead),"Data" = list( "ForecastDates" = index(vForecastComp), "Observations" = vObservations , "ForecastComparison" = vForecastComp ) )
+  names(HARForecast@Forecast) = paste("roll" , 1:iNRoll)
+  show(HARForecast)
+  return(HARForecast)
 }
