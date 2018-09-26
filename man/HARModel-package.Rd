@@ -15,6 +15,7 @@ The DESCRIPTION file:
 }
 \author{
 \packageAuthor{HARModel}
+
 Maintainer: \packageMaintainer{HARModel}
 }
 \references{

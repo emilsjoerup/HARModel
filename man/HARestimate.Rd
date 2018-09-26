@@ -7,7 +7,8 @@ HAR estimation
 This function does HAR estimation in line with Corsi(2009). It is important to note that the maximum of the lag vector (22 in the standard case) observations are omitted because these are used to generate the data.
 }
 \usage{
-HARestimate(vRealizedMeasure, vLags, iLagSE = 5)
+HARestimate(vRealizedMeasure, vLags = c(1,5,22), 
+show = TRUE)
 }
 \arguments{
   \item{vRealizedMeasure}{
@@ -16,18 +17,15 @@ An \code{xts} object containing a realized measure of the integrated volatility.
   \item{vLags}{
 A vector denoting which lags should be used in the estimation, standard of \code{c(1,5,22)} is in line with Corsi(2009).
 }
-\item{iLagSE}{
-An integer used to calculate the Newey-West standard errors.
+\item{show}{
+Logical to determine whether the output should be shown when done. Setting to FALSE makes Monte Carlo simulation and forecasting much faster.
 }
-}
-\details{
-Only \code{xts} objects are supported.
 }
 \value{
-Returns a \code{HARmodel}, which is a subclass of \code{lm}, object containing
-\item{1}{An \code{lm} object with a rewritten terms section for nice formatting}
-\item{2}{mVarCovar, a the variance-covariance matrix with the Newey-West standard errors}
-\item{3}{dates, a \code{Date} object containing the dates of the data used for estimation}
+Returns a \code{HARModel} object which is an S4 class object containing:
+\item{1}{\code{Model}, an \code{lm} object containing the estimation details.}
+\item{2}{\code{Info}, a \code{list} containing information used, the vector of lags , \code{vLags}, \code{Dates}, which is a vector of the dates of the data (if the provided realized measure is an "xts" object), and \code{ElapsedTime} , the time elapsed in seconds. }
+\item{3}{The List \code{Data} contains the realized measure provided.}
 
 }
 \references{
@@ -42,13 +40,11 @@ Emil Sjoerup
 See Also \code{\link{HARDataCreationC}}
 }
 \examples{
-\dontrun{
-Empty until I find data to include in the package, sorry.
-The usage of the function is rather simple, 
-if you have problems, send me an e-mail. 
-Will be updated.
-}
-}
-\note{
-If \code{bStandardErrors} is \code{FALSE} , the class of the returned object is \code{lm}
+set.seed(123)
+#Simulate a HAR process:
+HARSim = HARsimulate(iLength = 10000, 
+vLags = c(1,5,22), vCoef = c(0.5, 0.36 , 0.28 , 0.28 ))
+#Estimate the HAR process:
+HARModel = HARestimate(vRealizedMeasure = HARSim@Simulation,
+vLags = c(1,5,22))
 }
