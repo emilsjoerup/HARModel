@@ -3,9 +3,8 @@ setClass("HARForecast" , representation(Model = "HARModel" , Forecast = "data.fr
 setClass("HARSim" , representation(Simulation = "numeric" , Info = "list"))
 
 setMethod("show", "HARModel" , function(object) {
-  
   coefficients = object@Model$coefficients
-  mVarCovar = object@Model$mVarCovar
+ 
   cat("\n-------------------------HARModel----------------------\n")
   cat("\n Observations used:", length(object@Model$res),"\n", max(object@Info$Lags), "observations are used to create moving averages"  )
   cat(paste("\n Specification:"))
@@ -17,18 +16,8 @@ setMethod("show", "HARModel" , function(object) {
   cat("\n")
   cat(paste(formatC(coefficients, width = 8 , format="fg")))
   cat("\n")
-  cat(paste("\n Newey-West Standard errors using a lag order of ", object@Info$NWLagOrder , ":\n", sep=""))
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
-  cat("\n")
-  cat(paste(formatC(diag(mVarCovar) , width = 8 , format = "fg")))
-  cat("\n")
-  cat("\n T-Statistics: \n")
   
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
-  cat("\n", formatC((coefficients/diag(mVarCovar)) , width=8 , format = "fg"))
-  cat("\n")
-  cat("\n P-Values: \n")
-  cat(formatC(names(coefficients) , width=6),"\n" , formatC(dt(coefficients/diag(mVarCovar) , df=object@Model$df.residual) , width=6 , format="f"))
+  cat("\n Elapsed Time:" , object@Info$ElapsedTime , "seconds\n")
   cat("\n-------------------------------------------------------\n")
 })
 
@@ -42,8 +31,6 @@ setMethod("show" , "HARForecast" , function(object){
   cat("\n Length of rolls:" , dim(object@Forecast)[2],"\n")
   cat("\n Elapsed time:" , object@Info$ElapsedTime,"seconds\n")
   cat("\n-------------------------------------------------------\n")
-  
-  
 })
 
 setMethod("show" , "HARSim" , function(object){
@@ -60,19 +47,14 @@ setMethod("show" , "HARSim" , function(object){
   cat("\n")
   cat("\n Elapsed Time:" , object@Info$ElapsedTime , "seconds\n")
   cat("\n--------------------------------------------------\n")
-  
-  
-  
 })
 
 setMethod("plot" , signature(x= "HARModel", y = "missing"), function(x, which=NULL){
-  
-  vY = x@Data
+  vY = x@Data$Data
   vRes = x@Model$residuals
   vFitted.Val = x@Model$fitted.values
   if(is(vY, "xts")){
     vDates = x@Info$Dates
-    
     print(plot(cbind(vY , vFitted.Val), main = "Realized measure vs. Fitted values" , lty = c(2,1)))
     print(addLegend("topright" , col = c(1,2), on=1 , legend.names = c("Observed RM" , "Fitted Values") , lty = c(2,1) , lwd = c(2,2)))
     invisible(readline(prompt="Press [enter] to continue"))
@@ -86,12 +68,9 @@ setMethod("plot" , signature(x= "HARModel", y = "missing"), function(x, which=NU
     invisible(readline(prompt="Press [enter] to continue"))
     plot(y = vRes , x = vDates , type="l", main = "Residual plot" , ylab = "Residuals" , xlab = "dates")
     }
-  
-  
 })
 
 setMethod("plot" , signature(x = "HARForecast" , y = "missing") , function(x , which = NULL){
-  
   if(is(x@Data$Observations , "xts")){
   iRolls = dim(x@Forecast)[2]
   iNAhead = dim(x@Forecast)[1]
@@ -102,72 +81,115 @@ setMethod("plot" , signature(x = "HARForecast" , y = "missing") , function(x , w
   vForecastResiduals = vRollingForecastplot - x@Data$ForecastComparison[,1]
   vINAheadForecastplot = as.vector(x@Forecast[,1])
   vForecastComp = x@Data$ForecastComparison[,1]
-  
   if(length(vDatesiNAhead)==iNAhead){
     vINAheadForecastplot = xts(vINAheadForecastplot , order.by = vDatesiNAhead)
     print(plot(cbind(vForecastComp, vRollingForecastplot), main="Observed vs. forecasted", ylab = "Realized Volatility", col = c(1,2),  lty=c(2,1)))
     print(addLegend("topleft", on=1, legend.names= c("Observed (out of sample) " , "Forecasted") , col = c(1,2) , lty=c(2,1) , lwd=c(2,2)))
-    
     invisible(readline(prompt="Press [enter] to continue"))
-    
     print(plot(vForecastResiduals , main = "forecasting residuals"))
-
-    
   }else{
     print(plot(cbind(vForecastComp, vRollingForecastplot), main="Observed vs. forecasted", ylab = "Realized Volatility" , xlab = "Periods ahead", col = c(1,2),  lty=c(2,1)))
     print(addLegend("topleft", on=1, legend.names= c("Observed (out of sample) " , "Forecasted") , col = c(1,2) , lty=c(2,1) , lwd=c(2,2)))
-    
     invisible(readline(prompt="Press [enter] to continue"))
-    
     print(plot(vForecastResiduals , main = "forecasting residuals"))
-    
-
   }
   }
   else{
-    
     iRolls = dim(x@Forecast)[2]
     iNAhead = dim(x@Forecast)[1]
     vDatesRoll = tail(x@Data$ForecastDates , iRolls)
     vDatesiNAhead = tail(x@Data$ForecastDates, iNAhead)
     vRollingForecastplot = t(as.vector(x@Forecast[1,]))
-    
     vForecastResiduals = vRollingForecastplot - x@Data$ForecastComparison
     vINAheadForecastplot = as.vector(x@Forecast[,1])
     vForecastComp = x@Data$ForecastComparison
     if(length(vDatesiNAhead)==iNAhead){
-      
       plot(vForecastComp , main="Observed vs. forecasted", ylab = "Realized Volatility",type = "l" ,col =1,  lty=2)
       lines(vRollingForecastplot , col = 2 )
       legend("topleft", legend =  c("Observed (out of sample) " , "Forecasted") , col = c(1,2) , lty=c(2,1) , lwd=c(2,2))
-      
       invisible(readline(prompt="Press [enter] to continue"))
-      
       plot(vForecastResiduals , main = "forecasting residuals" , type = "l")
-  
     }else{
       print(plot(vForecastComp , main="Observed vs. forecasted", ylab = "Realized Volatility",type = "l" ,col =1,  lty=2))
       print(lines(vRollingForecastplot , col = 2 ))      
       print(legend("topleft", legend =  c("Observed (out of sample) " , "Forecasted") , col = c(1,2) , lty=c(2,1) , lwd=c(2,2)))
-      
       invisible(readline(prompt="Press [enter] to continue"))
-      
       print(plot(vForecastResiduals , main = "forecasting residuals" , type = "l"))
-      
     }
-    
   }
-  
-  
-  
 })
 
-setMethod("plot" , signature(x = "HARSim" , y = "missing") , function(x , which = NULL){
-  
-  plot(x@Simulation , x = (1:length(x@Simulation)) ,  type = "l" , main = "Simulated HARmodel" , xlab = "Time" , ylab = "Realized Measure")
+setMethod("plot" , signature(x = "HARSim" , y = "missing") , function(x , length = "ALL" , ctrl = "start"){
+  if(length == "ALL"){
+  plot(x@Simulation , x = (1:length(x@Simulation)) ,  type = "l" , main = "Simulated HARmodel" , xlab = "Time" , ylab = "Realized Measure")}
+  else if (ctrl == "start" & is(length,"numeric")){
+    plot(x@Simulation[1:length] , x = (1:length) ,  type = "l" , main = "Simulated HARmodel" , xlab = "Time" , ylab = "Realized Measure")
+  }else if(ctrl == "end" & is(length,"numeric")){
+    plot(x@Simulation[(length(x@Simulation) - length):length(x@Simulation)] , x = (length(x@Simulation) - length):length(x@Simulation) ,  type = "l" , main = "Simulated HARmodel" , xlab = "Time" , ylab = "Realized Measure")
+  }else{
+    cat("invalid plot type - if you believe your plot shoud be possible - send me an email")
+  }
 })
 
 setMethod("coef" , "HARModel" , function(object){
   vCoef = object@Model$coefficients
   return(vCoef)
+})
+
+setMethod("coef" , "HARForecast" , function(object){
+  vCoef = object@Model@Model$coefficients
+  return(vCoef)
+})
+
+setMethod("coef" , "HARSim" , function(object){
+  vCoef = object@Info$Coefficients
+  return(vCoef)
+})
+
+
+setGeneric("uncondmean", function(object)
+standardGeneric("uncondmean")
+)
+
+setMethod("uncondmean" , "HARModel" , function(object){
+  vCoef = coef(object)
+  uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
+  names(uncmean) = ""
+  return(c("Unconditional Mean" = uncmean))
+})
+
+setMethod("uncondmean" , "HARForecast" , function(object){
+  vCoef = coef(object)
+  uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
+  names(uncmean) = ""
+  return(c("Unconditional Mean" = uncmean))
+})
+
+setMethod("uncondmean" , "HARSim" , function(object){
+  vCoef = coef(object)
+  uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
+  names(uncmean) = ""
+  return(c("Unconditional Mean" = uncmean))
+})
+
+setGeneric("SandwichNeweyWest", function(object , lags)
+  standardGeneric("SandwichNeweyWest")
+)
+
+setMethod("SandwichNeweyWest" , "HARModel" , function(object , lags = 5){
+  mVarCovar = sandwich::NeweyWest(object@Model)
+  coefficients = object@Model$coefficients
+  cat(paste("\n Newey-West Standard errors using a lag order of ", lags , ":\n", sep=""))
+  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
+  cat("\n")
+  cat(paste(formatC(diag(mVarCovar) , width = 8 , format = "fg")))
+  cat("\n")
+  cat("\n T-Statistics: \n")
+  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
+  cat("\n", formatC((coefficients/diag(mVarCovar)) , width=8 , format = "fg"))
+  cat("\n")
+  cat("\n P-Values: \n")
+  cat(formatC(names(coefficients) , width=6),"\n" , formatC(dt(coefficients/diag(mVarCovar) , df=object@Model$df.residual) , width=6 , format="f"))
+  cat("\n")
+  return("HACmatrix" = mVarCovar)
 })

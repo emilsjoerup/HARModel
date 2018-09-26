@@ -7,13 +7,13 @@
 using namespace Rcpp;
 
 // HARDataCreationC
-NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure, arma::vec vLags);
+NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure, NumericVector vLags);
 RcppExport SEXP _HARModel_HARDataCreationC(SEXP vRealizedmeasureSEXP, SEXP vLagsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type vRealizedmeasure(vRealizedmeasureSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type vLags(vLagsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vLags(vLagsSEXP);
     rcpp_result_gen = Rcpp::wrap(HARDataCreationC(vRealizedmeasure, vLags));
     return rcpp_result_gen;
 END_RCPP

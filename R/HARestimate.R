@@ -1,12 +1,13 @@
 ########################################################################################################
-# This package is created by Emil Sjørup, at the time of beginning a bachelor of economics student
+# This package is created by Emil Sjoerrup, at the time of beginning a bachelor of economics student
 # at the university of Aarhus in Denmark.
 # Any bugs should be reported to Emilsjoerup@live.dk  
 ########################################################################################################
 
 
 
-HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), iLagSE = 5 , show=TRUE){
+HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), show=TRUE){#, iLagSE = 5 ){
+  start.time = Sys.time()
   ######Initialization and preparing data ######
   iLags = length(vLags)
   iT = length(vRealizedMeasure)
@@ -18,25 +19,28 @@ HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), iLagSE = 5 , show=T
   
   Model = lm(mData[,1] ~ mData[,2:(iLags+1)])
   
-  mVarCovar = sandwich::NeweyWest(Model , lag = iLagSE)
+  #mVarCovar = sandwich::NeweyWest(Model , lag = iLagSE)
   ##### Estimation end#
   
-  Model$mVarCovar = mVarCovar #Maybe put in INFO
-  Info = list("NWLagOrder" = iLagSE , "Lags" = vLags)
-  Info$NWLagOrder = iLagSE
-  Info$Lags = vLags
+  #Model$mVarCovar = mVarCovar #Maybe put in INFO
+  Info = list("Lags" = vLags)#"NWLagOrder" = iLagSE , "Lags" = vLags)
+  #Info$NWLagOrder = iLagSE
+  #Info$Lags = vLags
   
   names(Model$coefficients) = paste("beta", 0:iLags , sep="")
-  colnames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
-  rownames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
+  #colnames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
+  #rownames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
   if(is(vRealizedMeasure,"xts")){
     vDates = index(vRealizedMeasure)
     vDates = vDates[(max(vLags)+1):iT]
     Info$Dates = vDates
   }
-  HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , "Data" = list(vRealizedMeasure[(max(vLags)+1) : length(vRealizedMeasure)]))
+  Info$ElapsedTime = Sys.time() - start.time
+  HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , "Data" = list("Data" = vRealizedMeasure[(max(vLags)+1) : length(vRealizedMeasure)]))
   
-  if(show){show(HARModel)}
+  if(show){
+    show(HARModel)
+  }
   return(HARModel)
   
 }
@@ -44,10 +48,9 @@ HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), iLagSE = 5 , show=T
 
 #######Fast estimation routine which returns only the coefficients, it is used for forecasting and cuts down the time a lot.
 #######This function is NOT user-callable######
-#######iLagsPlusOne is calculated in the forecasting initialization so it can be done once isn't done every roll.
+#######iLagsPlusOne is calculated in the forecasting initialization so it can be done once, and not every roll
 FASTHARestimate = function(vRealizedMeasure , vLags , iLagsPlusOne){
   mData = HARDataCreationC(vRealizedMeasure , vLags)
   lModel = lm(mData[,1] ~ mData[,2:(iLagsPlusOne)])
   return(lModel$coefficients)
-  
 }

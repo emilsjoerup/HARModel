@@ -7,8 +7,8 @@ HAR simulation
 Simulates a HAR model. From using the AR representation of the HAR model.
 }
 \usage{
-HARsimulate(iLength = 1000, vLags = c(1, 5, 22),
-vCoef = c(1, 0.36, 0.28, 0.28), iBurnin = 100, dSigma = 1)
+HARsimulate(iLength=10000, vLags = c(1, 5, 22) , 
+vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
 }
 \arguments{
   \item{iLength}{
@@ -20,16 +20,11 @@ Vector of lags for constructing the model, standard is c(1,5,22) which is in lin
   \item{vCoef}{
 Coefficient vector which will be used to simulate the process. 
 }
-  \item{iBurnin}{
-Integer to determine the length of burnin in the simulation. Increasing this value beyond 100 does not change much, but lowering it CAN be bad.
-}
+
   \item{dSigma}{
 Standard deviation of the error term.
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-} 
 \value{
 Returns an S4 object of type \code{HARSim} which contains:
 \item{Simulation }{The simulated process}
@@ -43,25 +38,16 @@ of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196 .\cr
 \author{
 Emil Sjoerup
 }
-\note{
-
-}
-
-
-
 \seealso{
 See Also \code{\link{HARestimate}}
 }
 \examples{
 set.seed(123)
-#Simulate the process with size 10000 and a burnin of 1000
-HARSim = HARsimulate(iLength = 10000 , iBurnin = 1000, 
-vLags = c(1,5,22), vCoef = c(0.5, 0.36 , 0.28 , 0.28 ))
-#Show the object
-show(HARSim)
+#Simulate the process of size 10000
+HARSim = HARsimulate(iLength=10000, vLags = c(1, 5, 22),
+vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
 #plot the Object
 plot(HARSim)
-
 }
 \keyword{ HAR }% use one of  RShowDoc("KEYWORDS")
 \keyword{ simulation }% __ONLY ONE__ keyword per line

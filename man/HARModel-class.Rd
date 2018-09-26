@@ -1,9 +1,16 @@
 \name{HARModel-class}
 \alias{HARModel-class}
+\alias{show,HARModel-method}
+\alias{plot,HARModel,missing-method}
+\alias{uncondmean,HARModel-method}
+\alias{coef,HARModel-method}
+\alias{SandwichNeweyWest,HARModel-method}
 \docType{class}
-
 \title{
-Class for estimated HARModel object
+HARModel
+}
+\description{
+Class for HARModel objects
 }
 \section{Objects from the Class}{A virtual Class: No objects may be created from it.}
 \section{Slots}{
@@ -16,12 +23,13 @@ Class for estimated HARModel object
     \item{\code{Data}:}{\code{list} object containing the provided data.}
     }
 }
-
 \section{Methods}{
 \itemize{
 \item{\code{show}: Shows summary}
 \item{\code{plot}: Plots the HARModel}
-\item{\code{coef}: Extract the coefficients of a HARModel object}
+\item{\code{uncondmean}: Extracts the unconditional mean from the Model}
+\item{\code{coef}: Extracts the coefficients from the Model}
+\item{\code{SandwichNeweyWest}: Utilize the \code{sandwich} package to create newey west standard errors}
 }}
 \author{Emil Sjoerup}
 \keyword{classes}

@@ -1,9 +1,15 @@
 \name{HARForecast-class}
 \alias{HARForecast-class}
+\alias{show,HARForecast-method}
+\alias{plot,HARForecast,missing-method}
+\alias{uncondmean,HARForecast-method}
+\alias{coef,HARForecast-method}
 \docType{class}
-
 \title{
-Class for HAR forecast
+HARForecast
+}
+\description{
+Class for HARForecast object
 }
 \section{Objects from the Class}{A virtual Class: No objects may be created from it}
 \section{Slots}{
@@ -26,6 +32,8 @@ Class for HAR forecast
 \itemize{
 \item{\code{show}: Shows summary}
 \item{\code{plot}: Plot the forecasted series and observed series as well as the residuals}
+\item{\code{uncondmean}: Extracts the unconditional mean from the Model}
+\item{\code{coef}: Extracts the coefficients from the Model}
 }}
 \author{Emil Sjoerup}
 \keyword{classes}
