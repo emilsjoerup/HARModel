@@ -30,7 +30,7 @@ Returns a \code{HARModel} object which is an S4 class object containing:
 }
 \references{
 Corsi, F. 2009, A Simple Approximate Long-Memory Model
-of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196 .\cr
+of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
 }
 \author{
 Emil Sjoerup

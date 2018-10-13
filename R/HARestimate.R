@@ -6,7 +6,7 @@
 
 
 
-HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), show=TRUE){#, iLagSE = 5 ){
+HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), show=TRUE){
   start.time = Sys.time()
   ######Initialization and preparing data ######
   iLags = length(vLags)
@@ -16,17 +16,9 @@ HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), show=TRUE){#, iLagS
   ######Initialization and data preparation end#
   
   ##### Estimate ######
-  
   Model = lm(mData[,1] ~ mData[,2:(iLags+1)])
-  
-  #mVarCovar = sandwich::NeweyWest(Model , lag = iLagSE)
   ##### Estimation end#
-  
-  #Model$mVarCovar = mVarCovar #Maybe put in INFO
-  Info = list("Lags" = vLags)#"NWLagOrder" = iLagSE , "Lags" = vLags)
-  #Info$NWLagOrder = iLagSE
-  #Info$Lags = vLags
-  
+  Info = list("Lags" = vLags)
   names(Model$coefficients) = paste("beta", 0:iLags , sep="")
   #colnames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
   #rownames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
@@ -54,3 +46,11 @@ FASTHARestimate = function(vRealizedMeasure , vLags , iLagsPlusOne){
   lModel = lm(mData[,1] ~ mData[,2:(iLagsPlusOne)])
   return(lModel$coefficients)
 }
+
+
+
+
+
+
+
+
