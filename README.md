@@ -8,6 +8,7 @@ emilsjoerup@live.dk
 
 TODO:
 Implement HARJ , HARQ, FULL-HARQ, and Semivariance HAR.
+Nicer show and print methods
 
 
 Known bug(s):
