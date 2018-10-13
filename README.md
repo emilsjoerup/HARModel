@@ -7,7 +7,7 @@ If you find any bugs or think improvements can be made, please contact me at:
 emilsjoerup@live.dk
 
 TODO:
-Expand the models to incorporate extra components such as jumps.
+Implement HARJ , HARQ, FULL-HARQ, and Semivariance HAR.
 
 
 Known bug(s):
