@@ -5,52 +5,54 @@ setClass("HARSim" , representation(Simulation = "numeric" , Info = "list"))
 setMethod("show", "HARModel" , function(object) {
   coefficients = object@Model$coefficients
  
-  cat("\n-------------------------HARModel----------------------\n")
-  cat("\n Observations used:", length(object@Model$res),"\n", max(object@Info$Lags), "observations are used to create moving averages"  )
+  cat("\n----------------------------HARModel-------------------------\n")
+  cat("\n Observations used:", length(object@Model$res),"\n", "Maximum lags",max(object@Info$Lags , object@Info$JumpLags), "\n")
+  if(object@Info$Type == "HARJ"){
+    cat("\n Jump observations used", max(object@Info$JumpLags), "\n")
+  }
   cat(paste("\n Specification:"))
+  cat("\n Type:" , object@Info$Type)
   cat("\n Lags:", object@Info$Lags)
+  if(object@Info$Type == "HARJ"){
+    cat("\n JumpLags:", object@Info$JumpLags)  
+  }
   cat("\n")
   cat(paste("\n Estimates:\n"))
   cat("\n")
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
   cat("\n")
-  cat(paste(formatC(coefficients, width = 8 , format="fg")))
+  print(round(coefficients , 6) , digits = 5)  
   cat("\n")
-  
   cat("\n Elapsed Time:" , object@Info$ElapsedTime , "seconds\n")
-  cat("\n-------------------------------------------------------\n")
+  cat("\n-------------------------------------------------------------\n")
 })
 
 setMethod("show" , "HARForecast" , function(object){
   
-  cat("\n Model based on the provided realized measure less the periods for rolling:")
+  cat("\n First model estimated:")
   show(object@Model)
-  cat("\n----------------------HARForecast----------------------\n")
+  cat("\n-------------------------HARForecast-------------------------\n")
   cat("\n Forecast specification:\n")
   cat("\n Rolls performed:" , dim(object@Forecast)[1],"\n")
   cat("\n Length of rolls:" , dim(object@Forecast)[2],"\n")
   cat("\n Elapsed time:" , object@Info$ElapsedTime,"seconds\n")
-  cat("\n-------------------------------------------------------\n")
+  cat("\n-------------------------------------------------------------\n")
 })
 
 setMethod("show" , "HARSim" , function(object){
   coefficients = object@Info$Coefficients
-  cat("\n----------------------HARSim----------------------\n")
+  cat("\n-------------------------HARSim-------------------------\n")
   cat("\n Simulation length:" , object@Info$Length,"\n")
-  cat("\n Burnin Length:", object@Info$BurninLength,"\n")
   cat("\n Standard deviation of the error term:", object@Info$ErrorTermSD,"\n")
   cat("\n Lags used:", object@Info$Lags, "\n")
   cat("\n Coefficients:\n")
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
-  cat("\n")
-  cat(paste(formatC(coefficients, width = 8 , format="fg")))
+  print(round(coefficients , 6) , digits = 5)  
   cat("\n")
   cat("\n Elapsed Time:" , object@Info$ElapsedTime , "seconds\n")
-  cat("\n--------------------------------------------------\n")
+  cat("\n--------------------------------------------------------\n")
 })
 
 setMethod("plot" , signature(x= "HARModel", y = "missing"), function(x, which=NULL){
-  vY = x@Data$Data
+  vY = x@Data$`Realized Measure`
   vRes = x@Model$residuals
   vFitted.Val = x@Model$fitted.values
   if(is(vY, "xts")){
@@ -152,6 +154,10 @@ standardGeneric("uncondmean")
 )
 
 setMethod("uncondmean" , "HARModel" , function(object){
+  if(object@Info$Type!="HAR"){
+    print("Unconditional mean is only implemented for HAR type")
+    return(NULL)
+  }
   vCoef = coef(object)
   uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
   names(uncmean) = ""
@@ -166,6 +172,7 @@ setMethod("uncondmean" , "HARForecast" , function(object){
 })
 
 setMethod("uncondmean" , "HARSim" , function(object){
+  
   vCoef = coef(object)
   uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
   names(uncmean) = ""

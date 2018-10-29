@@ -1,10 +1,4 @@
-########################################################################################################
-# This package is created by Emil Sjoerup, at the time of beginning a bachelor of economics student
-# at the university of Aarhus in Denmark.
-# Any bugs should be reported to Emilsjoerup@live.dk  
-########################################################################################################
-
-HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001){
+HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001 , type = "HAR" , warning = T){
   ######Initialization section ######
   start.time = Sys.time()
   iLags = length(vLags)
@@ -13,7 +7,7 @@ HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.3
   mSim = matrix(nrow = iLength + iLagsMax , ncol = iLagsPlusOne)
   vErrorTermSim = rnorm(iLength+iLagsMax , 0 , sd = dSigma)
   ######Initialization end #########
-  if(sum(vCoef[2:iLagsPlusOne])>1){
+  if(sum(vCoef[2:iLagsPlusOne])>1 && warning){
     print("Sum of coefficients are above 1 - Watch out for stationarity - proceeding as normal")
   }
   mSim[1:iLagsMax,]  = vCoef[1]/(1-sum(vCoef[2:iLagsPlusOne]))
@@ -29,6 +23,7 @@ HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.3
   show(HARSim)
   return(HARSim)
 }
+
 
 
 HARMonteCarlo = function(iLength=1000, vLags = c(1, 5, 22) , vCoef = c(1, 0.36 ,0.28 , 0.28), iBurnin=100 , dSigma = 1 , iLagsPlusOne = length(vLags)+1){

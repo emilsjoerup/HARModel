@@ -26,7 +26,7 @@ A matrix containing the data used for HAR estimation or forecasting.
 }
 \references{
 Corsi, F. 2009, A Simple Approximate Long-Memory Model
-of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196 .\cr
+of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
 }
 \author{
 Emil Sjoerup
@@ -36,12 +36,12 @@ See Also \code{\link{HARestimate}}
 }
 \examples{
 \dontrun{
-## Construct a non-negative vector of size 1000:
+## Construct a  vector of size 1000:
 vData = rnorm(1000)^2
 ## Construct a lag-vector
 vLags = c(1,5,22)
-mExample = HARDataCreationC(vData , vLags)
-## The dimensions of mExample is (978 , 4)
+Example = HARDataCreationC(vData , vLags)
+## The dimensions of Example is (978 , 4)
 }
 }
 

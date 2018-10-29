@@ -1,4 +1,4 @@
-#include <Rcpparmadillo.h>
+#include <RcppArmadillo.h>
 
 using namespace Rcpp;
 
@@ -26,5 +26,6 @@ NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure , NumericVector vL
  
   return(mHarData);
 }
+
 
 

@@ -32,17 +32,11 @@ Returns a \code{HARforecast}, which is a subclass of \code{HARmodel}, object con
 }
 \references{
 Corsi, F. 2009, A Simple Approximate Long-Memory Model
-of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196 .\cr
+of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
 }
 \author{
 Emil Sjoerup
 }
-%%\note{
-%%  ~~further notes~~
-%%}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 See Also \code{\link{HARestimate}}
 }
@@ -59,7 +53,5 @@ vLags = c(1, 5, 22), iNRoll = 200 , iNAhead = 200)
 plot(HARForecast)
 }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ HAR }% use one of  RShowDoc("KEYWORDS")
-\keyword{ forecasting }% __ONLY ONE__ keyword per line
+\keyword{ HAR }
+\keyword{ forecast }
