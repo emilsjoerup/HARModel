@@ -9,9 +9,7 @@ HARforecast = function(vRealizedMeasure, vAuxData = NULL , vLags = c(1,5,22) , v
   vObservations = vRealizedMeasure[(iLagsMax+1):(iT-iNRoll)]
   vForecastComp = vRealizedMeasure[(iT-iNRoll+1):iT] 
   iTForecast = length(vForecastComp)
-  #browser()
-  length(c(vObservations , vForecastComp))
-  length(vRealizedMeasure)
+
   ######Initialization end #######
   ######Checks section #######
   if(iNRoll > (length(vRealizedMeasure)/2)){
