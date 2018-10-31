@@ -1,0 +1,9 @@
+2018-31-10 Emil Sjørup <emilsjoerup@live.dk>
+  *DESCRIPTION (Version): New version is 0.1.5.
+  *NAMESPACE (exports):No longer exports HARDataCreationC
+  *NAMESPACE (imports):importFrom("stats" , "ar.ols" , "predict") and importFrom("methods" , "missingArg") added
+  *Added HAR-J, HARQ and Full-HARQ models to estimation and forecasting.
+  *Bug fix in forecasting.
+  *Remove function HARMonteCarlo.
+  
+  

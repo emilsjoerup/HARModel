@@ -1,4 +1,4 @@
-HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), vJumpLags = NULL ,show=TRUE , type = "HAR" , HARQargs = list(demean = T)){
+HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), vJumpLags = NULL  , type = "HAR" , HARQargs = list(demean = T) ,show=TRUE ){
   start.time = Sys.time()
   ######Initialization and preparing data ######
   iLags = length(vLags)
@@ -62,9 +62,9 @@ HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), v
       
     } # Dimension check end
     
-    mData = cbind(mData , mJumpData[ ,2:(iJumpLags+1)])
+    mData = cbind(mData , mJumpData[ ,-1])
     
-    Model = lm(mData[,1] ~ mData[,2:(iLags+1 + iJumpLags)])
+    Model = lm(mData[,1] ~ mData[,-1])
     
     names(Model$coefficients) = c(paste("beta", 0:iLags, sep="") , paste("j" , 1:iJumpLags, sep =""))
     
@@ -89,18 +89,13 @@ HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), v
   
   ##### Type: "HARQ" - BPQ
   if(type == "HARQ"){
-    
-    
-    
-    
     vAuxDataQ = sqrt(vAuxData[max(vLags) : (length(vAuxData)-1)])
     if(HARQargs$demean){
       vAuxDataQ =  vAuxDataQ - mean(vAuxDataQ)
     }
     
     
-    mData = mData
-    mData = cbind(mData[,1], mData[,2:(iLags+1)] ,  vAuxDataQ*mData[,2])
+    mData = cbind(mData, vAuxDataQ*mData[,2])
     
     Model = lm(mData[,1] ~ mData[,2:dim(mData)[2]])
     names(Model$coefficients) = c(paste("beta", 0:iLags, sep="") , paste("beta_q" , 1, sep =""))
@@ -130,9 +125,6 @@ HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), v
       vMeanAux = apply(mAuxData , 2, mean)
       mAuxData = mAuxData - vMeanAux
     }
-    
-    
-    
     mData = cbind(mData[,1], mData[,2:(iLags+1)] ,  mAuxData * mData[,-1])
     
     Model = lm(mData[,1] ~ mData[,2:dim(mData)[2]])
@@ -159,6 +151,7 @@ HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), v
 
   
   sError = "something unexpected happened, please report bug with code to replicate."
+  show(sError)
   return(sError)
   
 }
@@ -170,7 +163,7 @@ HARestimate = function(vRealizedMeasure, vAuxData = NULL ,  vLags = c(1,5,22), v
 FASTHARestimate = function(vRealizedMeasure , vLags , iLagsPlusOne){
   mData = HARDataCreationC(vRealizedMeasure , vLags)
   lModel = lm(mData[,1] ~ mData[,2:(iLagsPlusOne)])
-  return(lModel$coefficients)
+  return(lModel)
 }
 
 FASTHARJestimate = function(vRealizedMeasure , vAuxData, vLags , vJumpLags , iLagsPlusOne, iJumpLags , iJumpLagsPlusOne){
@@ -188,18 +181,22 @@ FASTHARJestimate = function(vRealizedMeasure , vAuxData, vLags , vJumpLags , iLa
         mData = mData[-(1:iDimCheck) , ] #If iDimCheck is positive, mData will have row(s) removed
       }
     } # Dimension check end
-  
     mData = cbind(mData , mJumpData[ ,2:(iJumpLagsPlusOne)])
     
     lModel = lm(mData[,1] ~ mData[,2:(iLagsPlusOne + iJumpLags)])
-    
-   
     return(lModel)
   
 }
 
-FASTHARQestimate =function(vRealizedMeasure , vLags , iLagsPlusOne){
-  
+FASTHARQestimate =function(vRealizedMeasure , vAuxData ,  vLags , iLagsPlusOne , HARQargs = list(demean = T)){
+  vAuxDataQ = sqrt(vAuxData[max(vLags) : (length(vAuxData)-1)])
+  if(HARQargs$demean){
+    vAuxDataQ =  vAuxDataQ - mean(vAuxDataQ)
+  }
+  mData = HARDataCreationC(vRealizedMeasure , vLags)
+  mData = cbind(mData ,  vAuxDataQ*mData[,2])
+  Model = lm(mData[,1] ~ mData[,2:dim(mData)[2]])
+  return(Model)
 }
 
 

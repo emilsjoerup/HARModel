@@ -32,8 +32,8 @@ setMethod("show" , "HARForecast" , function(object){
   show(object@Model)
   cat("\n-------------------------HARForecast-------------------------\n")
   cat("\n Forecast specification:\n")
-  cat("\n Rolls performed:" , dim(object@Forecast)[1],"\n")
   cat("\n Length of rolls:" , dim(object@Forecast)[2],"\n")
+  cat("\n Rolls performed:" , dim(object@Forecast)[1],"\n")
   cat("\n Elapsed time:" , object@Info$ElapsedTime,"seconds\n")
   cat("\n-------------------------------------------------------------\n")
 })
@@ -154,12 +154,12 @@ standardGeneric("uncondmean")
 )
 
 setMethod("uncondmean" , "HARModel" , function(object){
-  if(object@Info$Type!="HAR"){
+  if(!object@Info$Type=="HAR"){
     print("Unconditional mean is only implemented for HAR type")
     return(NULL)
   }
   vCoef = coef(object)
-  uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
+  uncmean = vCoef[1]/(1-sum(vCoef[-1]))
   names(uncmean) = ""
   return(c("Unconditional Mean" = uncmean))
 })
@@ -174,7 +174,7 @@ setMethod("uncondmean" , "HARForecast" , function(object){
 setMethod("uncondmean" , "HARSim" , function(object){
   
   vCoef = coef(object)
-  uncmean = vCoef[1]/(1-sum(vCoef[2:length(vCoef)]))
+  uncmean = vCoef[1]/(1-sum(vCoef[-1]))
   names(uncmean) = ""
   return(c("Unconditional Mean" = uncmean))
 })
@@ -184,19 +184,19 @@ setGeneric("SandwichNeweyWest", function(object , lags)
 )
 
 setMethod("SandwichNeweyWest" , "HARModel" , function(object , lags = 5){
-  mVarCovar = sandwich::NeweyWest(object@Model)
+  if(!object@Info$Type=="HAR"){
+    print("SandwichNeweyWest is only implemented for HAR type , if you please, you can try to use sandwich::NeweyWest() on the lm submodel")
+    return(NULL)
+  }
+  if(missingArg(lags)){
+    lags = 5
+  }
+  cat("\n-------------------Newey-West Standard errors----------------\n")
+  mVarCovar = sandwich::NeweyWest(object@Model , lags)
   coefficients = object@Model$coefficients
   cat(paste("\n Newey-West Standard errors using a lag order of ", lags , ":\n", sep=""))
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
-  cat("\n")
-  cat(paste(formatC(diag(mVarCovar) , width = 8 , format = "fg")))
-  cat("\n")
-  cat("\n T-Statistics: \n")
-  cat(paste(formatC(names(coefficients), width = 8 , format="s")))
-  cat("\n", formatC((coefficients/diag(mVarCovar)) , width=8 , format = "fg"))
-  cat("\n")
-  cat("\n P-Values: \n")
-  cat(formatC(names(coefficients) , width=6),"\n" , formatC(dt(coefficients/diag(mVarCovar) , df=object@Model$df.residual) , width=6 , format="f"))
-  cat("\n")
+  mPrint = rbind(coefficients , "Standard errors" =  diag(mVarCovar) , "T-Statistics" = coefficients/diag(mVarCovar), "P-values" = dt(coefficients/diag(mVarCovar) , df=object@Model$df.residual))
+  print(round(mPrint,6 ) ,5 )
+  cat("\n-------------------------------------------------------------\n")
   return("HACmatrix" = mVarCovar)
 })

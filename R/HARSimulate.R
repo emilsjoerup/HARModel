@@ -1,4 +1,4 @@
-HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001 , type = "HAR" , warning = T){
+HARsimulate = function(iLength=1500, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001 , type = "HAR"){
   ######Initialization section ######
   start.time = Sys.time()
   iLags = length(vLags)
@@ -7,13 +7,17 @@ HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.3
   mSim = matrix(nrow = iLength + iLagsMax , ncol = iLagsPlusOne)
   vErrorTermSim = rnorm(iLength+iLagsMax , 0 , sd = dSigma)
   ######Initialization end #########
-  if(sum(vCoef[2:iLagsPlusOne])>1 && warning){
-    print("Sum of coefficients are above 1 - Watch out for stationarity - proceeding as normal")
+  vImplementedTypes = c("HAR")
+  
+  if(!any(grepl(type, vImplementedTypes))){
+    
+    cat("type argument not correctly specifiec or is not implemented, available types are:", paste(dQuote(vImplementedTypes)))
+    return(NULL)
   }
-  mSim[1:iLagsMax,]  = vCoef[1]/(1-sum(vCoef[2:iLagsPlusOne]))
+  mSim[1:iLagsMax,]  = vCoef[1]/(1-sum(vCoef[-1]))
   for (i in (iLagsMax+1):(iLength + iLagsMax)){
     mSim[(i), ] = HARDataCreationC(mSim[(i-iLagsMax):i,1], vLags)
-    mSim[(i),1] =  vCoef[1] + sum(mSim[i , 2:iLagsPlusOne] * vCoef[2:iLagsPlusOne]) + vErrorTermSim[i]
+    mSim[(i),1] =  vCoef[1] + sum(mSim[i , 2:iLagsPlusOne] * vCoef[-1]) + vErrorTermSim[i]
   }
   
   ElapsedTime = Sys.time() - start.time
@@ -22,14 +26,6 @@ HARsimulate = function(iLength=10000, vLags = c(1, 5, 22) , vCoef = c(0.002, 0.3
   HARSim = new("HARSim" , "Simulation" = mSim[(iLagsMax+1):(iLagsMax+iLength),1] , "Info" = Info)
   show(HARSim)
   return(HARSim)
-}
-
-
-
-HARMonteCarlo = function(iLength=1000, vLags = c(1, 5, 22) , vCoef = c(1, 0.36 ,0.28 , 0.28), iBurnin=100 , dSigma = 1 , iLagsPlusOne = length(vLags)+1){
-  lSim = HARsimulate(iLength, vLags, vCoef , dSigma)
-  vCoef = FASTHARestimate(lSim@Simulation , vLags , iLagsPlusOne)
-  return(vCoef)
 }
 
 

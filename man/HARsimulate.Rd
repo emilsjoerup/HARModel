@@ -7,8 +7,8 @@ HAR simulation
 Simulates a HAR model. From using the AR representation of the HAR model.
 }
 \usage{
-HARsimulate(iLength=10000, vLags = c(1, 5, 22) , 
-vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
+HARsimulate(iLength=1500, vLags = c(1, 5, 22) , 
+vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001 , type = "HAR")
 }
 \arguments{
   \item{iLength}{
@@ -24,6 +24,9 @@ Coefficient vector which will be used to simulate the process.
   \item{dSigma}{
 Standard deviation of the error term.
 }
+  \item{type}{
+An unused argument for now, will be used to designate different model types.
+  }
 }
 \value{
 Returns an S4 object of type \code{HARSim} which contains:
@@ -38,16 +41,11 @@ of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
 \author{
 Emil Sjoerup
 }
-\seealso{
-See Also \code{\link{HARestimate}}
-}
 \examples{
 set.seed(123)
 #Simulate the process of size 10000
 HARSim = HARsimulate(iLength=10000, vLags = c(1, 5, 22),
 vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
-#plot the Object
-plot(HARSim)
 }
 \keyword{ HAR }% use one of  RShowDoc("KEYWORDS")
 \keyword{ simulation }% __ONLY ONE__ keyword per line

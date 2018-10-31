@@ -1,11 +1,11 @@
 Package: HARModel
 Type: Package
 Title: Heterogeneous Autoregressive Models
-Version: 0.1
-Date: 2018-09-26
+Version: 0.1.5
+Date: 2018-10-31
 Author: Emil Sjoerup
 Maintainer: Emil Sjoerup <emilsjoerup@live.dk>
-Description: Estimation, simulation, and forecasting using the HAR model from Corsi(2009) <DOI:10.1093/jjfinec/nbp001>.
+Description: Estimation, simulation, and forecasting using the HAR model from Corsi(2009) <DOI:10.1093/jjfinec/nbp001> and extensions.
 BugReports: https://github.com/emilsjoerup/HARModel/issues
 URL: https://github.com/emilsjoerup/HARModel
 License: GPL-3
@@ -13,4 +13,4 @@ Imports: Rcpp (>= 0.12.17) , xts, zoo, sandwich,
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
 Depends: R (>= 2.10), methods
-Packaged: 2018-10-29 16:48:15 UTC; emils
+Packaged: 2018-10-31 13:36:11 UTC; emils
