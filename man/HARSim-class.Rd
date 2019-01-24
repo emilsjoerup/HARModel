@@ -2,7 +2,7 @@
 \alias{HARSim-class}
 \alias{show,HARSim-method}
 \alias{plot,HARSim,missing-method}
-\alias{uncondmean,HARSim-method}
+\alias{uncmean,HARSim-method}
 \alias{coef,HARSim-method}
 \docType{class}
 \title{
@@ -26,11 +26,11 @@ Class for HARSim object
 }
 
 \section{Methods}{
-\itemize{
-\item{\code{show}: Shows summary}
-\item{\code{plot}: Plot the forecasted series and observed series as well as the residuals}
-\item{\code{uncondmean}: Extracts the unconditional mean from the simulation}
-\item{\code{coef}: Extracts the coefficients from the simulation}
+\describe{
+\item{\code{show}:}{\code{signature(object = "HARSim")}: Shows summary}
+\item{\code{plot}:}{\code{signature(x = "HARSim" , y = "missing")}: Plot the forecasted series and observed series as well as the residuals}
+\item{\code{uncmean}:}{\code{signature(object = "HARSim")}: Extracts the unconditional mean from the simulation}
+\item{\code{coef}:}{\code{signature(object = "HARSim")}: Extracts the coefficients from the simulation}
 }}
 \author{Emil Sjoerup}
 \keyword{classes}

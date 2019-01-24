@@ -7,20 +7,49 @@
 using namespace Rcpp;
 
 // HARDataCreationC
-NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure, NumericVector vLags);
-RcppExport SEXP _HARModel_HARDataCreationC(SEXP vRealizedmeasureSEXP, SEXP vLagsSEXP) {
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure, arma::vec vLags);
+RcppExport SEXP _HARModel_HARDataCreationC(SEXP vRealizedMeasureSEXP, SEXP vLagsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type vRealizedmeasure(vRealizedmeasureSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vLags(vLagsSEXP);
-    rcpp_result_gen = Rcpp::wrap(HARDataCreationC(vRealizedmeasure, vLags));
+    Rcpp::traits::input_parameter< arma::vec >::type vRealizedMeasure(vRealizedMeasureSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type vLags(vLagsSEXP);
+    rcpp_result_gen = Rcpp::wrap(HARDataCreationC(vRealizedMeasure, vLags));
+    return rcpp_result_gen;
+END_RCPP
+}
+// HARSimC
+arma::mat HARSimC(int iLength, arma::vec vLags, double dConst, arma::vec vCoef, double dSigma);
+RcppExport SEXP _HARModel_HARSimC(SEXP iLengthSEXP, SEXP vLagsSEXP, SEXP dConstSEXP, SEXP vCoefSEXP, SEXP dSigmaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type iLength(iLengthSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type vLags(vLagsSEXP);
+    Rcpp::traits::input_parameter< double >::type dConst(dConstSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type vCoef(vCoefSEXP);
+    Rcpp::traits::input_parameter< double >::type dSigma(dSigmaSEXP);
+    rcpp_result_gen = Rcpp::wrap(HARSimC(iLength, vLags, dConst, vCoef, dSigma));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fastLMcoef
+arma::vec fastLMcoef(arma::mat X, arma::colvec y);
+RcppExport SEXP _HARModel_fastLMcoef(SEXP XSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(fastLMcoef(X, y));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
+    {"_HARModel_HARSimC", (DL_FUNC) &_HARModel_HARSimC, 5},
+    {"_HARModel_fastLMcoef", (DL_FUNC) &_HARModel_fastLMcoef, 2},
     {NULL, NULL, 0}
 };
 

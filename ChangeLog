@@ -1,9 +1,15 @@
-2018-31-10 Emil Sjørup <emilsjoerup@live.dk>
-  *DESCRIPTION (Version): New version is 0.1.5.
+2019-01-24 Emil Sjoerup <emilsjoerup@live.dk>
+  *DESCRIPTION (Version): New version is 0.2
   *NAMESPACE (exports):No longer exports HARDataCreationC
-  *NAMESPACE (imports):importFrom("stats" , "ar.ols" , "predict") and importFrom("methods" , "missingArg") added
-  *Added HAR-J, HARQ and Full-HARQ models to estimation and forecasting.
+  *NAMESPACE importFrom("methods" , "missingArg") added
+  *Added HAR-J, HARQ, and HARQ-J models to estimation and forecasting
+  *Add ellipsis to plotting to increase user control
+  *Improve plotting routines by using xts
   *Bug fix in forecasting.
-  *Remove function HARMonteCarlo.
+  *Forecasts are now output as a named matrix
+  *Remove function HARMonteCarlo
+  *Rewrote the datacreation function with the armadillo library and optimized it - this increased the speed of the this step by almost 50%
+  *Rename uncondmean to uncmean
+  
   
   
