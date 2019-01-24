@@ -1,17 +1,5 @@
-<<<<<<< HEAD
-########################################################################################################
-# This package is created by Emil Sjoerrup, at the time of beginning a bachelor of economics student
-# at the university of Aarhus in Denmark.
-# Any bugs should be reported to Emilsjoerup@live.dk  
-########################################################################################################
-
-
-
-HARestimate = function(vRealizedMeasure , vLags = c(1,5,22), show=TRUE){
-=======
 HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL ,  vLags = c(1,5,22), vJumpLags = NULL , vAuxLags = NULL,
                        type = "HAR" , InsanityFilter = TRUE, HARQargs = list(demean = TRUE ) ,show=TRUE ){
->>>>>>> Development
   start.time = Sys.time()
   ######Initialization and preparing data ######
   iT = length(vRealizedMeasure)
@@ -20,15 +8,6 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
   vImplementedTypes = c("HAR" , "HARJ" , "HARQ" , "HARQ-J")
   if(!any(grepl(type, vImplementedTypes))){
   
-<<<<<<< HEAD
-  ##### Estimate ######
-  Model = lm(mData[,1] ~ mData[,2:(iLags+1)])
-  ##### Estimation end#
-  Info = list("Lags" = vLags)
-  names(Model$coefficients) = paste("beta", 0:iLags , sep="")
-  #colnames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
-  #rownames(Model$mVarCovar) = paste("beta", 0:iLags , sep="")
-=======
     cat("type argument not correctly specifiec or is not implemented, available types are:", paste(dQuote(vImplementedTypes)))
     return(NULL)
   }
@@ -43,7 +22,6 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
   names(Model$coefficients) = paste("beta", c(0,vLags) , sep="")
   Info = list("Lags" = vLags , "type" = type)
   vDates = as.Date((max(vLags)+1):iT, origin = "1970/01/01")
->>>>>>> Development
   if(is(vRealizedMeasure,"xts")){
     vDates = index(vRealizedMeasure)
     vDates = vDates[(max(vLags)+1):(iT)]
@@ -365,18 +343,6 @@ FASTHARQJestimate = function(vRealizedMeasure , vAuxData , vJumpComponent , vLag
   # }
   mAuxData = sqrt(mAuxData)
   mData = HARDataCreationC(vRealizedMeasure , vLags)
-<<<<<<< HEAD
-  lModel = lm(mData[,1] ~ mData[,2:(iLagsPlusOne)])
-  return(lModel$coefficients)
-}
-
-
-
-
-
-
-
-=======
   
 
 #First bind RQ to RV, then Jump to the combination
@@ -422,5 +388,4 @@ HARinsanityFilter = function(vY , dL, dU , Replacement){
   vY[vIndex] = Replacement
   return(vY)
 }
->>>>>>> Development
 

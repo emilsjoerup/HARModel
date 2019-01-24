@@ -49,10 +49,7 @@ A \code{\linkS4class{HARModel}} object
 \references{
 Corsi, F. 2009, A Simple Approximate Long-Memory Model
 of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
-<<<<<<< HEAD
-=======
 Bollerslev, T., Patton, A., Quaedvlieg, R. 2016,  Exploiting the errors: A simple approach for improved volatility forecasting, \emph{Journal of Econometrics }, vol.192, issue 1, 1-18. \cr
->>>>>>> Development
 }
 \author{
 Emil Sjoerup
