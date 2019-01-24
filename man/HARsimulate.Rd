@@ -7,8 +7,8 @@ HAR simulation
 Simulates a HAR model. From using the AR representation of the HAR model.
 }
 \usage{
-HARsimulate(iLength=10000, vLags = c(1, 5, 22) , 
-vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
+HARsimulate(iLength=1500, vLags = c(1, 5, 22), 
+vCoef = c(0.01, 0.36 ,0.28 , 0.28), dSigma = 0.001, show = TRUE)
 }
 \arguments{
   \item{iLength}{
@@ -20,9 +20,12 @@ Vector of lags for constructing the model, standard is c(1,5,22) which is in lin
   \item{vCoef}{
 Coefficient vector which will be used to simulate the process. 
 }
-
   \item{dSigma}{
 Standard deviation of the error term.
+}
+
+\item{show}{
+Logical to determine whether the output should be shown when done.
 }
 }
 \value{
@@ -38,16 +41,14 @@ of Realized Volatility, \emph{Journal of Financial Econometrics}, 174--196.\cr
 \author{
 Emil Sjoerup
 }
-\seealso{
-See Also \code{\link{HARestimate}}
-}
 \examples{
 set.seed(123)
 #Simulate the process of size 10000
 HARSim = HARsimulate(iLength=10000, vLags = c(1, 5, 22),
-vCoef = c(0.002, 0.36 ,0.28 , 0.28), dSigma = 0.001)
-#plot the Object
-plot(HARSim)
+vCoef = c(0.01, 0.36, 0.28, 0.28), dSigma = 0.001)
+
+HARFit = HARestimate(HARSim@Simulation, vLags = c(1, 5, 22))
+
 }
-\keyword{ HAR }% use one of  RShowDoc("KEYWORDS")
-\keyword{ simulation }% __ONLY ONE__ keyword per line
+\keyword{ HAR }
+\keyword{ simulation }

@@ -1,30 +1,27 @@
 #include <RcppArmadillo.h>
 
-using namespace Rcpp;
-
-
-// [[Rcpp::export]]
-
-NumericMatrix HARDataCreationC(NumericVector vRealizedmeasure , NumericVector vLags){
-  int iT = vRealizedmeasure.size();
-  int iLags = vLags.size();
+using namespace arma;
+//[[Rcpp::export]]
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags){
+  int iT       = vRealizedMeasure.size();
+  int iLags    = vLags.size();
   int iMaxLags = max(vLags);
-  NumericMatrix  mHarData(iT - max(vLags) , iLags+1);
+  arma::mat mHARData((iT - iMaxLags) , (iLags + 1));
+  int i = 0;
   
-  for(int i=0; i<iLags; i++){
-    if(vLags[i] == 1){
-      mHarData(_,(i+1)) = vRealizedmeasure[Range((iMaxLags-1) , (iT-1))];
-      
-    }
-    for(int j=0; j<iT-max(vLags); j++){
-      mHarData(j,(i+1)) = sum(vRealizedmeasure[Range(iMaxLags+(j) -vLags[i], iMaxLags+(j) -1)])/ vLags[i];
-      
-    }
-    
-  }
-  mHarData(_,0 ) = vRealizedmeasure[Range(iMaxLags,iT)];
- 
-  return(mHarData);
-}
+  mHARData.col(0) = vRealizedMeasure(arma::span((iMaxLags) , (iT-1)));
 
+  if(vLags[0] == 1){
+    mHARData.col(1) = vRealizedMeasure(arma::span(iMaxLags-1 , (iT - 2)));
+    i = 1;
+  }
+
+  for(i = i; i<iLags; i++){
+  for(int j = 0; j<(iT - iMaxLags); j++){
+    mHARData(j,(i+1)) = sum(vRealizedMeasure(arma::span((iMaxLags + j - vLags[i]) , (iMaxLags + j - 1) )))/vLags[i];
+  }
+
+  }
+  return(mHARData);
+}
 

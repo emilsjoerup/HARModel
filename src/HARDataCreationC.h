@@ -1,5 +1,4 @@
 #ifndef HARDataCreationC_H
 #define HARDataCreationC_H
-
-Rcpp::NumericMatrix HARDataCreationC(Rcpp::NumericVector vRealizedmeasure , Rcpp::NumericVector vLags);
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags);
 #endif
