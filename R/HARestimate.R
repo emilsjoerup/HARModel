@@ -1,41 +1,35 @@
-HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL ,  vLags = c(1,5,22), vJumpLags = NULL , vAuxLags = NULL,
-                       type = "HAR" , InsanityFilter = TRUE, HARQargs = list(demean = TRUE ) ,show=TRUE ){
-  start.time = Sys.time()
-  ######Initialization and preparing data ######
-  iT = length(vRealizedMeasure)
-  mData = HARDataCreationC(vRealizedMeasure, vLags)
-  ######Initialization and data preparation end#
-  vImplementedTypes = c("HAR" , "HARJ" , "HARQ" , "HARQ-J")
-  if(!any(grepl(type, vImplementedTypes))){
+HARestimate = function(RM, BPV = NULL, RQ = NULL, periods = c(1,5,22), periodsJ = NULL, periodsRQ = NULL,
+                       type = "HAR" , InsanityFilter = TRUE){
+  ###### Initialization and preparing data ######
+  iT = length(RM)
   
+  ###### Initialization and data preparation end ######
+  vImplementedTypes = c("HAR" , "HARJ" , "HARQ" , "HARQ-J", "CHAR", "CHARQ")
+  if(!(type %in% vImplementedTypes)){
     cat("type argument not correctly specifiec or is not implemented, available types are:", paste(dQuote(vImplementedTypes)))
     return(NULL)
   }
-  if(length(vAuxLags) > length(vLags)){
-    stop("vAuxLags cannot be longer than vLags")
+  if(length(periodsRQ) > length(periods)){
+    stop("periodsRQ cannot be longer than periods")
   }
   
   ##### Type: "HAR"  - vanilla
   if(type == "HAR"){
+  mData = HARDataCreationC(RM, periods)
   Model = lm(mData[,1] ~ mData[,-1])
   
-  names(Model$coefficients) = paste("beta", c(0,vLags) , sep="")
-  Info = list("Lags" = vLags , "type" = type)
-  vDates = as.Date((max(vLags)+1):iT, origin = "1970/01/01")
-  if(is(vRealizedMeasure,"xts")){
-    vDates = index(vRealizedMeasure)
-    vDates = vDates[(max(vLags)+1):(iT)]
+  names(Model$coefficients) = paste("beta", c(0,periods) , sep="")
+  Info = list("Lags" = periods , "type" = type)
+  vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+  if(is(RM,"xts")){
+    vDates = index(RM)
+    vDates = vDates[(max(periods)+1):(iT)]
     Info$Dates = vDates
   }
-  
-  Info$"ElapsedTime" = Sys.time() - start.time
   
   HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
                  "Data" = list("RealizedMeasure" = xts(mData[,1], vDates)) )
   
-  if(show){
-    show(HARModel)
-  }
   return(HARModel)
   }
   ##### Type: "HAR"  - vanilla end
@@ -43,14 +37,13 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
   
   ##### Type: "HARJ" 
   if(type == "HARJ"){
-    if(is.null(vJumpComponent)){
-      stop("Jump component must be provided as the vJumpComponent input")
-    }
-    if(is.null(vJumpLags)){
-      vJumpLags = vLags
+    mData = HARDataCreationC(RM, periods)
+    JumpComponent = pmax(RM - BPV,0)
+    if(is.null(periodsJ)){
+      periodsJ = periods
     }
     
-    mJumpData = HARDataCreationC(vJumpComponent , vJumpLags)
+    mJumpData = HARDataCreationC(JumpComponent , periodsJ)
     
     # Dimension check
     if(dim(mData)[1] != dim(mJumpData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
@@ -72,43 +65,38 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
     
     Model = lm(mData[,1] ~ mData[,-1])
     if(InsanityFilter){
-    Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(vRealizedMeasure) , mean(vRealizedMeasure) )  
+    Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(RM) , mean(RM) )  
     }
     
-    names(Model$coefficients) = c(paste("beta", c(0,vLags), sep="") , paste("j" , vJumpLags, sep =""))
+    names(Model$coefficients) = c(paste("beta", c(0,periods), sep="") , paste("j" , periodsJ, sep =""))
     
-    Info = list("Lags" = vLags , "JumpLags" = vJumpLags , "type" = type)
-    vDates = as.Date((max(vLags)+1):iT, origin = "1970/01/01")
-    if(is(vRealizedMeasure,"xts")){
-      vDates = index(vRealizedMeasure)
-      vDates = vDates[(max(c(vLags , vJumpLags))+1):iT]
+    Info = list("Lags" = periods , "JumpLags" = periodsJ , "type" = type)
+    vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+    if(is(RM,"xts")){
+      vDates = index(RM)
+      vDates = vDates[(max(c(periods , periodsJ))+1):iT]
       Info$Dates = vDates
     }
     
-    Info$"ElapsedTime" = Sys.time() - start.time
     HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
-                   "Data" = list("RealizedMeasure" = xts(vRealizedMeasure[(iT-nrow(mData)+1):iT], order.by = vDates),
-                                 "JumpComponent" = xts(vJumpComponent[(iT-nrow(mData)+1):iT], order.by = vDates)))
+                   "Data" = list("RealizedMeasure" = xts(RM[(iT-nrow(mData)+1):iT], order.by = vDates),
+                                 "JumpComponent" = xts(JumpComponent[(iT-nrow(mData)+1):iT], order.by = vDates)))
     
     
-    if(show){
-      show(HARModel)
-    }
+    
     return(HARModel)
   }
   ##### Type: "HARJ" end
 
   ##### Type: "HARQ" - BPQ
   if(type == "HARQ"){
-    if(is.null(vAuxLags)){
-    vAuxLags = vLags 
+    mData = HARDataCreationC(RM, periods)
+    if(is.null(periodsRQ)){
+      periodsRQ = periods 
     }
-    mAuxData = as.matrix(HARDataCreationC(vAuxData , vAuxLags))
-    if(HARQargs$demean){
-      vMeanAux = colMeans(mAuxData)
-      
-      mAuxData = sqrt(mAuxData) - sqrt(vMeanAux)
-    }
+    mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+    meanAux = mean(sqrt(RQ))
+    mAuxData = sqrt(mAuxData) - meanAux
     
     if(dim(mData)[1] != dim(mAuxData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
       iDimCheck = dim(mData)[1] - dim(mAuxData)[1]
@@ -125,8 +113,8 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
       
     }
 
-    if(length(vLags) != length(vAuxLags)){
-      mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(vAuxLags)+1)])
+    if(length(periods) != length(periodsRQ)){
+      mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
     }
     else{
       mData = cbind(mData,  mAuxData[,-1] * mData[,-1])
@@ -134,49 +122,39 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
     
     Model = lm(mData[,1] ~ mData[,-1])
     if(InsanityFilter){
-      Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(vRealizedMeasure) , mean(vRealizedMeasure) )
+      Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(RM) , mean(RM) )
     }
-    names(Model$coefficients) = c(paste("beta",c(0,vLags), sep="") , paste("beta_q" , vAuxLags, sep =""))
+    names(Model$coefficients) = c(paste("beta",c(0,periods), sep="") , paste("beta_q" , periodsRQ, sep =""))
     
     
-    Info = list("Lags" = vLags , "RQLags" = vAuxLags , "type" = type)
-    vDates = as.Date((max(vLags)+1):iT, origin = "1970/01/01")
-    if(is(vRealizedMeasure,"xts")){
-      vDates = index(vRealizedMeasure)
-      vDates = vDates[(max(vLags)+1):iT]
+    Info = list("Lags" = periods , "RQLags" = periodsRQ , "type" = type)
+    vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+    if(is(RM,"xts")){
+      vDates = index(RM)
+      vDates = vDates[(max(periods)+1):iT]
       Info$Dates = vDates
     }
-
-    Info$"ElapsedTime" = Sys.time() - start.time
     HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
-                   "Data" = list("RealizedMeasure" = xts(vRealizedMeasure[(iT-nrow(mData)+1):iT], order.by = vDates),
-                                 "RealizedQuarticity" = xts(vAuxData[(iT-nrow(mData)+1):iT], order.by = vDates)))
-    if(show){
-      show(HARModel)
-    }
+                   "Data" = list("RealizedMeasure" = xts(RM[(iT-nrow(mData)+1):iT], order.by = vDates),
+                                 "RealizedQuarticity" = xts(RQ[(iT-nrow(mData)+1):iT], order.by = vDates)))
+    
     return(HARModel)
     
   }
   ##### Type: "HARQ" end
+  
   ##### Type: "HARQ-J" - BPQ
   if(type == "HARQ-J"){
-    if(is.null(vAuxLags)){
-      vAuxLags = vLags 
+    mData = HARDataCreationC(RM, periods)
+    JumpComponent = pmax(RM - BPV,0)
+    if(is.null(periodsRQ)){
+      periodsRQ = periods 
     }
-    mAuxData = as.matrix(HARDataCreationC(vAuxData , vAuxLags))
-    if(HARQargs$demean){
-      vMeanAux = colMeans(mAuxData)
-      
-      mAuxData = sqrt(mAuxData) - sqrt(vMeanAux)
-    }
-    else{
-      mAuxData = sqrt(mAuxData)
-    }
-    if(is.null(vJumpComponent)){
-      stop("Jump component must be provided as the vJumpComponent input")
-    }
-    if(is.null(vJumpLags)){
-      vJumpLags = vLags
+    mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+    meanAux = mean(sqrt(RQ))
+    mAuxData = sqrt(mAuxData) - meanAux
+    if(is.null(periodsJ)){
+      periodsJ = periods
     }
     
     #First bind RQ to RV, then Jump to the combination
@@ -194,13 +172,13 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
       }
       
     }
-    if(length(vLags) != length(vAuxLags)){
-      mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(vAuxLags)+1)])
+    if(length(periods) != length(periodsRQ)){
+      mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
     }
     else{
       mData = cbind(mData ,  mAuxData[,-1]*mData[,-1])
     }
-    mJumpData = HARDataCreationC(vJumpComponent , vJumpLags)
+    mJumpData = HARDataCreationC(JumpComponent , periodsJ)
     # Dimension check on Jump component
     if(dim(mData)[1] != dim(mJumpData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
       iDimCheck = dim(mData)[1] - dim(mJumpData)[1]
@@ -222,33 +200,101 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
     
     Model = lm(mData[,1] ~ mData[,-1])
     if(InsanityFilter){
-      Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(vRealizedMeasure) , mean(vRealizedMeasure) )
+      Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(RM) , mean(RM) )
     }
-    names(Model$coefficients) = c(paste("beta", c(0,vLags), sep="") , paste("beta_q" , vAuxLags, sep =""),
-                                  paste("beta_j" , vJumpLags , sep = ""))
+    names(Model$coefficients) = c(paste("beta", c(0,periods), sep="") , paste("beta_q" , periodsRQ, sep =""),
+                                  paste("beta_j" , periodsJ , sep = ""))
     
     
-    Info = list("Lags" = vLags , "RQLags" = vAuxLags, "JumpLags" = vJumpLags, "type" = type)
-    vDates = as.Date((max(vLags)+1):iT, origin = "1970/01/01")
-    if(is(vRealizedMeasure,"xts")){
-      vDates = index(vRealizedMeasure)
-      vDates = vDates[(max(vLags)+1):iT]
+    Info = list("Lags" = periods , "RQLags" = periodsRQ, "JumpLags" = periodsJ, "type" = type)
+    vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+    if(is(RM,"xts")){
+      vDates = index(RM)
+      vDates = vDates[(max(periods)+1):iT]
       Info$Dates = vDates
     }
     
-    Info$"ElapsedTime" = Sys.time() - start.time
     HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
-                   "Data" = list("RealizedMeasure" = xts(vRealizedMeasure[(iT-nrow(mData)+1):iT], order.by = vDates),
-                                 "RealizedQuarticity" = xts(vAuxData[(iT-nrow(mData)+1):iT], order.by = vDates),
-                                 "JumpComponent" = xts(vJumpComponent[(iT-nrow(mData)+1):iT], order.by = vDates)))
-    if(show){
-      show(HARModel)
-    }
+                   "Data" = list("RealizedMeasure" = xts(RM[(iT-nrow(mData)+1):iT], order.by = vDates),
+                                 "RealizedQuarticity" = xts(RQ[(iT-nrow(mData)+1):iT], order.by = vDates),
+                                 "JumpComponent" = xts(JumpComponent[(iT-nrow(mData)+1):iT], order.by = vDates)))
+    
     return(HARModel)
   }
   #####Type: "HARQ-J" end
   
-  sError = "something unexpected happened, please report bug with code to replicate."
+  if(type == "CHAR"){
+    mData = cbind(RM[(max(periods)+1):(iT)], HARDataCreationC(BPV, periods)[,-1])
+    Model = lm(mData[,1] ~ mData[,-1])
+    
+    names(Model$coefficients) = paste("beta", c(0,periods) , sep="")
+    Info = list("Lags" = periods , "type" = type)
+    vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+    if(is(RM,"xts")){
+      vDates = index(RM)
+      vDates = vDates[(max(periods)+1):(iT)]
+      Info$Dates = vDates
+    }
+    
+    HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
+                   "Data" = list("RealizedMeasure" = xts(mData[,1], vDates)) )
+    
+    return(HARModel)
+  }#####Type: "CHAR" end
+  
+  ##### Type: "CHARQ" - BPQ
+  if(type == "CHARQ"){
+    mData = cbind(RM[(max(periods)+1):(iT)], HARDataCreationC(BPV, periods)[,-1])
+    mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+    meanAux = mean(sqrt(RQ))
+    mAuxData = sqrt(mAuxData) - meanAux
+
+    if(dim(mData)[1] != dim(mAuxData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
+      iDimCheck = dim(mData)[1] - dim(mAuxData)[1]
+      
+      if(iDimCheck<0){
+        
+        mAuxData = mAuxData[-(1:abs(iDimCheck)),] #If iDimCheck is negative, mAuxData will have row(s) removed
+      }
+      
+      if(iDimCheck>0){
+        
+        mData = mData[-(1:iDimCheck) , ] #If iDimCheck is positive, mData will have row(s) removed
+      }
+      
+    }
+    
+    if(length(periods) != length(periodsRQ)){
+      mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
+    }
+    else{
+      mData = cbind(mData,  mAuxData[,-1] * mData[,-1])
+    }
+    
+    Model = lm(mData[,1] ~ mData[,-1])
+    if(InsanityFilter){
+      Model$fitted.values = HARinsanityFilter(Model$fitted.values , 0 , max(RM) , mean(RM) )
+    }
+    names(Model$coefficients) = c(paste("beta",c(0,periods), sep="") , paste("beta_q" , periodsRQ, sep =""))
+    
+    
+    Info = list("Lags" = periods , "RQLags" = periodsRQ , "type" = type)
+    vDates = as.Date((max(periods)+1):iT, origin = "1970/01/01")
+    if(is(RM,"xts")){
+      vDates = index(RM)
+      vDates = vDates[(max(periods)+1):iT]
+      Info$Dates = vDates
+    }
+    HARModel = new("HARModel" , "Model" = Model ,"Info" = Info , 
+                   "Data" = list("RealizedMeasure" = xts(RM[(iT-nrow(mData)+1):iT], order.by = vDates),
+                                 "RealizedQuarticity" = xts(RQ[(iT-nrow(mData)+1):iT], order.by = vDates)))
+    
+    return(HARModel)
+    
+  }
+  
+  
+  sError = "something unexpected happened, please report bug."
   show(sError)
   return(sError)
   
@@ -256,20 +302,20 @@ HARestimate = function(vRealizedMeasure, vJumpComponent = NULL, vAuxData = NULL 
 
 
 #######Fast estimation routine which returns only the coefficients, it is used for forecasting and cuts down the time a lot.
-#######These functions are undocumented and not directly user-callable
+#######These functions are undocumented and not exported
 
-FASTHARestimate = function(vRealizedMeasure , vLags){
+FASTHARestimate = function(RM , periods){
   
-  mData = HARDataCreationC(vRealizedMeasure , vLags)
+  mData = HARDataCreationC(RM , periods)
   vCoef = fastLMcoef(cbind(1,mData[-nrow(mData),-1]) , mData[-nrow(mData),1])
   #leave the last row out of the estimation and pass it back to form the forecast
   return(list("coefficients" = vCoef, "mData" = mData))
 }
 
-FASTHARJestimate = function(vRealizedMeasure, vAuxData, vLags, vJumpLags ){
-  mData = HARDataCreationC(vRealizedMeasure , vLags)
+FASTHARJestimate = function(RM, JumpComponent, periods, periodsJ ){
+  mData = HARDataCreationC(RM , periods)
   
-  mJumpData = HARDataCreationC(vAuxData , vJumpLags)
+  mJumpData = HARDataCreationC(JumpComponent , periodsJ)
     # Dimension check
     if(dim(mData)[1] != dim(mJumpData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
       iDimCheck = dim(mData)[1] - dim(mJumpData)[1]
@@ -289,21 +335,16 @@ FASTHARJestimate = function(vRealizedMeasure, vAuxData, vLags, vJumpLags ){
   
 }
 
-FASTHARQestimate =function(vRealizedMeasure, vAuxData, vLags, vAuxLags = NULL, HARQargs = list(demean = T)){
-  if(is.null(vAuxLags)){
-    vAuxLags = vLags
+FASTHARQestimate =function(RM, RQ, periods, periodsRQ = NULL){
+  if(is.null(periodsRQ)){
+    periodsRQ = periods
   }
-  mAuxData = as.matrix(HARDataCreationC(vAuxData , vAuxLags))
-  # if(HARQargs$demean){
-  #   vMeanAux = colMeans(mAuxData)
-  #   mAuxData = sqrt(mAuxData) - sqrt(vMeanAux)
-  # }
-  # else{
-  #   
-  # }
-  mAuxData = sqrt(mAuxData)
-
-  mData = HARDataCreationC(vRealizedMeasure , vLags)
+  mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+  meanAux = mean(sqrt(RQ))
+  
+  mAuxData = sqrt(mAuxData) - meanAux
+  
+  mData = HARDataCreationC(RM , periods)
 
   if(dim(mData)[1] != dim(mAuxData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
     iDimCheck = dim(mData)[1] - dim(mAuxData)[1]
@@ -319,8 +360,8 @@ FASTHARQestimate =function(vRealizedMeasure, vAuxData, vLags, vAuxLags = NULL, H
     }
     
   }
-  if(length(vLags) != length(vAuxLags)){
-    mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(vAuxLags)+1)])
+  if(length(periods) != length(periodsRQ)){
+    mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
   }
   else{
     mData = cbind(mData ,  mAuxData[,-1]*mData[,-1])
@@ -332,20 +373,14 @@ FASTHARQestimate =function(vRealizedMeasure, vAuxData, vLags, vAuxLags = NULL, H
 }
 
 
-FASTHARQJestimate = function(vRealizedMeasure , vAuxData , vJumpComponent , vLags , vAuxLags , vJumpLags , HARQargs = list(demean = T)){
-  mAuxData = as.matrix(HARDataCreationC(vAuxData , vAuxLags))
-  # if(HARQargs$demean){
-  #   vMeanAux = colMeans(mAuxData)
-  #   mAuxData = sqrt(mAuxData) - sqrt(vMeanAux)
-  # }
-  # else{
-  #   
-  # }
-  mAuxData = sqrt(mAuxData)
-  mData = HARDataCreationC(vRealizedMeasure , vLags)
+FASTHARQJestimate = function(RM , RQ , JumpComponent , periods , periodsRQ , periodsJ){
+  mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+  meanAux = mean(sqrt(RQ))
   
-
-#First bind RQ to RV, then Jump to the combination
+  mAuxData = sqrt(mAuxData) - meanAux
+  mData = HARDataCreationC(RM , periods)
+  
+  #First bind RQ to RV, then Jump to the combination
   if(dim(mData)[1] != dim(mAuxData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
       iDimCheck = dim(mData)[1] - dim(mAuxData)[1]
     if(iDimCheck<0){
@@ -355,14 +390,14 @@ FASTHARQJestimate = function(vRealizedMeasure , vAuxData , vJumpComponent , vLag
       mData = mData[-(1:iDimCheck) , ] #If iDimCheck is positive, mData will have row(s) removed
     }
   }#dimension check end
-  if(length(vLags) != length(vAuxLags)){
-    mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(vAuxLags)+1)])
+  if(length(periods) != length(periodsRQ)){
+    mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
   }
   else{
     mData = cbind(mData ,  mAuxData[,-1]*mData[,-1])
   }
   
-  mJumpData = HARDataCreationC(vJumpComponent , vJumpLags)
+  mJumpData = HARDataCreationC(JumpComponent , periodsJ)
   # Dimension check on Jump component
   if(dim(mData)[1] != dim(mJumpData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
     iDimCheck = dim(mData)[1] - dim(mJumpData)[1]
@@ -382,6 +417,52 @@ FASTHARQJestimate = function(vRealizedMeasure , vAuxData , vJumpComponent , vLag
   return(list("coefficients" = vCoef, "mData" = mData))
   
 }
+
+
+FASTCHARestimate = function(RM, BPV, periods, iT){
+  mData = cbind(RM[(max(periods)+1):(iT)], HARDataCreationC(BPV, periods)[,-1])
+  vCoef = fastLMcoef(cbind(1,mData[-nrow(mData),-1]) , mData[-nrow(mData),1])
+  #leave the last row out of the estimation and pass it back to form the forecast
+  return(list("coefficients" = vCoef, "mData" = mData))
+}
+
+
+
+FASTCHARQestimate =function(RM, BPV, RQ, periods, periodsRQ, iT){
+  
+  mData = cbind(RM[(max(periods)+1):(iT)], HARDataCreationC(BPV, periods)[,-1])
+  
+  mAuxData = as.matrix(HARDataCreationC(RQ , periodsRQ))
+  meanAux = mean(sqrt(RQ))
+  
+  mAuxData = sqrt(mAuxData) - meanAux
+  
+  if(dim(mData)[1] != dim(mAuxData)[1]){ # Checking whether the length of the realized measure and jump matrix match up
+    iDimCheck = dim(mData)[1] - dim(mAuxData)[1]
+    
+    if(iDimCheck<0){
+      
+      mAuxData = mAuxData[-(1:abs(iDimCheck)),] #If iDimCheck is negative, mAuxData will have row(s) removed
+    }
+    
+    if(iDimCheck>0){
+      
+      mData = mData[-(1:iDimCheck) , ] #If iDimCheck is positive, mData will have row(s) removed
+    }
+    
+  }
+  if(length(periods) != length(periodsRQ)){
+    mData = cbind(mData , mAuxData[,-1] * mData[,2:(length(periodsRQ)+1)])
+  }
+  else{
+    mData = cbind(mData ,  mAuxData[,-1]*mData[,-1])
+  }
+  vCoef = fastLMcoef(cbind(1,mData[-nrow(mData),-1]) , mData[-nrow(mData),1])
+  #leave the last row out of the estimation and pass it back to form the forecast
+  return(list("coefficients" = vCoef, "mData" = mData))
+  
+}
+
 
 HARinsanityFilter = function(vY , dL, dU , Replacement){
   vIndex = (vY<dL | vY>dU)

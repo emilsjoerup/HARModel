@@ -10,6 +10,11 @@
   *Remove function HARMonteCarlo
   *Rewrote the datacreation function with the armadillo library and optimized it - this increased the speed of the this step by almost 50%
   *Rename uncondmean to uncmean
-  
-  
-  
+2019-03-19 Emil Sjoerup <emilsjoerup@live.dk>
+  *DESCRIPTION (Version): New version is 0.3
+  *Change many of the names used in the package, now the nomenclature is much cleaner.
+  *Fix typo in HARQ-J where JumpForecast was named JumpFOrecast
+  *Added some methods that work with "lm" objects that I thought may be useful (wrappers for the "lm" model of HARModel)
+2019-04-13 Emil Sjoerup <emilsjoerup@live.dk>
+  *Added windowType argument to HARForecast() to allow for expanding window estimation when forecasting.
+  *Bugfix in plotting models with non-xts objects.

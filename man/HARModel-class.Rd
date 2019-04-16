@@ -9,6 +9,17 @@
 \alias{SandwichNeweyWest,HARModel-method}
 \alias{SandwichNeweyWest,ANY-method}
 \alias{SandwichNeweyWest}
+\alias{qlike,HARModel-method}
+\alias{qlike,ANY-method}
+\alias{qlike}
+\alias{logLik,HARModel-method}
+\alias{confint,HARModel-method}
+\alias{residuals,HARModel-method}
+\alias{summary,HARModel-method}
+
+
+
+
 \docType{class}
 \title{
 HARModel
@@ -34,6 +45,12 @@ Class for HARModel objects
 \item{\code{uncmean}:}{\code{signature(object = "HARModel")}: Extracts the unconditional mean from the Model}
 \item{\code{coef}:}{\code{signature(object = "HARModel")}: Extracts the coefficients from the Model}
 \item{\code{SandwichNeweyWest}:}{\code{signature(object = "HARModel")}: Utilize the \code{sandwich} package to create newey west standard errors}
+\item{\code{qlike}:}{\code{signature(object = "HARModel")}: Calculate the in sample 'qlike' loss function for a HARModel object}
+\item{\code{logLik}:}{A wrapper for the "lm" subclass of the HARModel object}
+\item{\code{confint}:}{A wrapper for the "lm" subclass of the HARModel object}
+\item{\code{residuals}:}{A wrapper for the "lm" subclass of the HARModel object}
+\item{\code{summary}:}{A wrapper for the "lm" subclass of the HARModel object}
+
 }}
 \author{Emil Sjoerup}
 \keyword{classes}

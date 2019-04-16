@@ -5,8 +5,8 @@ HARDataCreationC <- function(vRealizedMeasure, vLags) {
     .Call(`_HARModel_HARDataCreationC`, vRealizedMeasure, vLags)
 }
 
-HARSimC <- function(iLength, vLags, dConst, vCoef, dSigma) {
-    .Call(`_HARModel_HARSimC`, iLength, vLags, dConst, vCoef, dSigma)
+HARSimC <- function(iLength, vLags, dConst, coef, dSigma) {
+    .Call(`_HARModel_HARSimC`, iLength, vLags, dConst, coef, dSigma)
 }
 
 fastLMcoef <- function(X, y) {

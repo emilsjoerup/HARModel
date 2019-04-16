@@ -1,6 +1,6 @@
-setClass("HARModel", representation(Model = "lm", Info = "list", Data = "list"))
-setClass("HARForecast" , representation(Model = "HARModel" , Forecast = "matrix", Info = "list" , Data = "list"))
-setClass("HARSim" , representation(Simulation = "numeric" , Info = "list"))
+setClass("HARModel", slots = c("Model", "Info", "Data"))
+setClass("HARForecast", slots = c("Model", "Forecast", "Info", "Data" ))
+setClass("HARSim", slots = c("Simulation", "Info"))
 
 setMethod("show", signature(object = "HARModel") , function(object) {
   coefficients = object@Model$coefficients
@@ -23,22 +23,22 @@ setMethod("show", signature(object = "HARModel") , function(object) {
   cat(paste("\n Estimates:\n"))
   cat("\n")
   cat("\n")
-  print(round(coefficients , 6) , digits = 5)  
+  print(round(coefficients , 6) , digits = 4)  
   cat("\n")
-  cat("\n Elapsed Time:" , round(as.double(object@Info[["ElapsedTime"]] , units = "secs" ) , digits = 3)  , "seconds\n")
+  cat("\n")
+  cat("R-squared: ", round(summary(object)$r.squared, 4))
+  cat("\n")
+  cat("Adjusted R-squared: ", round(summary(object)$adj.r.squared, 4))
   cat("\n-------------------------------------------------------------------------\n")
 })
 
 setMethod("show" , signature(object = "HARForecast") , function(object){
-  
   cat("\n First model estimated:")
   show(object@Model)
-  
   cat("\n-------------------------------HARForecast-------------------------------\n")
-  cat("\n Forecast specification:\n")
-  cat("\n Length of rolls:" , dim(object@Forecast)[2],"\n")
-  cat("\n Rolls performed:" , dim(object@Forecast)[1],"\n")
-  
+  cat("\n Forecast specification:" , object@Info[["windowType"]], "\n")
+  cat("\n Length of rolls:" , dim(object@Forecast)[1],"\n")
+  cat("\n Rolls performed:" , dim(object@Forecast)[2],"\n")
   cat("\n Elapsed Time:" , round(as.double(object@Info[["ElapsedTime"]] , units = "secs" ) , digits = 3)  , "seconds\n")
   cat("\n-------------------------------------------------------------------------\n")
 })
@@ -51,7 +51,7 @@ setMethod("show" , signature(object = "HARSim") , function(object){
   cat("\n Standard deviation of the error term:", object@Info[["ErrorTermSD"]],"\n")
   cat("\n Lags used:", object@Info$Lags, "\n")
   cat("\n Coefficients:\n")
-  print(round(coefficients , 6) , digits = 5)  
+  print(round(coefficients , 6) , digits = 4)  
   cat("\n")
   cat("\n Elapsed Time:" , round(as.double(object@Info[["ElapsedTime"]] , units = "secs" ) , digits = 3)  , "seconds\n")
   cat("\n-------------------------------------------------------------------------\n")
@@ -59,28 +59,28 @@ setMethod("show" , signature(object = "HARSim") , function(object){
 
 setMethod("plot" , signature(x= "HARModel", y = "missing"), 
           function(x, legend.loc = "topright",
-                   col = 2:1, lwd= 2, 
-                   main = "Realized measure vs. Fitted values",
-                   legend.names = c("Realized Measure" , "Fitted values"), ...){
-  
-  vY = x@Data$`RealizedMeasure`
-  vFitted.Val = xts(x@Model$fitted.values , order.by = index(vY))
-  p1 = plot(cbind(vFitted.Val, vY), main = main, col = col, ...)
+                   col = 2:1, lwd= 2, lty = c(1,2),
+                   main = NULL,
+                   legend.names = c("Realized Measure" , "Fitted values"), yaxis.right = FALSE, ...){
+  vY = x@Model$model$`mData[, 1]`
+  vFitted.Val = x@Model$fitted.values
+  vFitted.Val = xts(vFitted.Val, order.by = index(last(x@Data$RealizedMeasure, length(vFitted.Val))))
+  if(is.null(main)) main = paste("Observed vs. fitted based on model: ", x@Info$type)
+  p1 = plot(cbind(vFitted.Val, vY), main = main, col = col, yaxis.right = yaxis.right, ...)
   p1 = addLegend(legend.loc = legend.loc, legend.names = legend.names,
-                   col = col, lwd = lwd, ...)
+                   col = col, lwd = lwd)
   p1
 })
 
 setMethod("plot" , signature(x = "HARForecast", y = "missing"), 
           function(x, legend.loc = "topright",
-                   main = "Observed vs. forecasted",
-                   legend.names = c("Realized Measure" , "Forecasted Values"),
-                   col = 2:1, lwd= 2, ...){
-  
+                   legend.names = c("Forecasted Values", "Realized Measure"), main =NULL,
+                   col = 2:1, lwd= 2, lty = c(1,2), yaxis.right = FALSE,...){
   vForecastComp = x@Data$`ForecastComparison`
   vRollingForecastplot = xts(x@Forecast[1,], index(vForecastComp))
-  p1 = plot(cbind(vRollingForecastplot,vForecastComp), col = col, main = main, ...)
-  p1 = addLegend(legend.loc = legend.loc, legend.names = legend.names, col = col, lwd = lwd, ...)
+  if(is.null(main)) main = paste("Observed vs. forecasted based on model: ", x@Info$type)
+  p1 = plot(cbind(vRollingForecastplot,vForecastComp), col = col, main = main, yaxis.right = yaxis.right, ...)
+  p1 = addLegend(legend.loc = legend.loc, legend.names = legend.names, col = col, lwd = lwd)
   p1
 })
 
@@ -163,10 +163,64 @@ setMethod("SandwichNeweyWest" , signature(object = "HARModel") , function(object
   mVarCovar = sandwich::NeweyWest(object@Model , lags)
   coefficients = object@Model$coefficients
   cat(paste("\n Newey-West Standard errors using a lag order of ", lags , ":\n", sep=""))
-  mPrint = rbind(coefficients , "Standard errors" =  diag(mVarCovar) , 
+  mPrint = rbind(coefficients , "Standard errors" =  diag(mVarCovar), 
                  "T-Statistics" = coefficients/diag(mVarCovar), "P-values" = dt(coefficients/diag(mVarCovar) , 
                                                                                 df=object@Model$df.residual))
   print(round(mPrint,6 ) ,5 )
   cat("\n-------------------------------------------------------------\n")
   return("HACmatrix" = mVarCovar)
+})
+
+setGeneric("forecastres", function(object)
+standardGeneric("forecastres")
+)
+
+
+setMethod("forecastres", signature(object = "HARForecast"), function(object){
+  vRes = object@Forecast[1,] - object@Data$ForecastComparison
+  return(vRes)
+})
+
+
+setGeneric("qlike", function(object)
+  standardGeneric("qlike")
+)
+
+setMethod("qlike", signature(object = "HARModel"), function(object){
+  RV = object@Data$RealizedMeasure
+  FV  = object@Model$fitted.values
+  qLike = RV/FV - log(RV / FV) - 1
+  return(qLike) 
+}
+)
+
+setMethod("qlike", signature(object = "HARForecast"), function(object){
+  RV = object@Data$ForecastComparison  
+  FV  = object@Forecast[1,]
+  qLike = RV/FV - log(RV / FV) - 1
+  return(qLike) 
+}
+)
+
+###Methods that work with "lm" objects that I thought may be useful.
+###Wrappers from the HARModel to "lm"
+setMethod("logLik" , signature(object = "HARModel") , function(object, ...){
+  out = logLik(object@Model, ...)
+  return(out)
+})
+
+setMethod("confint" , signature(object = "HARModel") , function(object, parm, level = 0.95, ...){
+  out = confint(object@Model, parm = parm, level = level, ...)
+  return(out)
+})
+
+setMethod("residuals" , signature(object = "HARModel") , function(object, ...){
+  out = residuals(object@Model, ...)
+  return(out)
+})
+
+setMethod("summary" , signature(object = "HARModel") , function(object, ...){
+  out = summary(object@Model,...)
+  out$call =  as.name("lm(y ~ x)")
+  return(out)
 })

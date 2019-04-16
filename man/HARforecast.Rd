@@ -4,30 +4,30 @@
 HAR forecasting
 }
 \description{
-Does rolling out of sample forecasting of a HAR model.
+Rolling out of sample forecasting of a HAR model.
 }
 \usage{
-HARforecast(vRealizedMeasure, vJumpComponent= NULL, vAuxData = NULL , vLags = c(1,5,22), 
-            vJumpLags = NULL, vAuxLags = NULL, iNRoll=10 , iNAhead=10 , type = "HAR",
-            InsanityFilter = TRUE ,  HARQargs = list(demean = T))
+HARforecast(RM, BPV= NULL, RQ = NULL , periods = c(1,5,22), 
+            periodsJ = NULL, periodsRQ = NULL, iNRoll=10 , iNAhead=10 , type = "HAR",
+            windowType = "rolling", InsanityFilter = TRUE)
 }
 \arguments{
-  \item{vRealizedMeasure}{
+  \item{RM}{
 An \code{xts} object containing a realized measure of the integrated volatility.
 }
-  \item{vJumpComponent}{
+  \item{BPV}{
 A \code{numeric} containing the jump proportion of the realized measure used for \code{HARJ} and \code{HARQ-J} types.
   }
-  \item{vAuxData}{
+  \item{RQ}{
 A \code{numeric} containing  the realized quarticity used for \code{HARQ} and \code{HARQ-J} types.
   }
-\item{vLags}{
+\item{periods}{
 A vector denoting which lags should be used in the estimation, standard of \code{c(1,5,22)} is in line with Corsi(2009).
 }
-\item{vJumpLags}{
+\item{periodsJ}{
 A \code{numeric} denoting which lags should be used in Jump estimation, if applicable.
   }
-  \item{vAuxLags}{
+  \item{periodsRQ}{
 A \code{numeric} denoting which lags should be used in Realized Quarticity estimation, if applicable.
   }
 \item{iNRoll}{
@@ -39,20 +39,22 @@ The length of each rolling forecast.
 \item{type}{
 A \code{character} denoting which type of HAR model to estimate.
   }
+\item{windowType}{
+A \code{character} denoting which kind of window to use, either "rolling"/"fixed" or "increasing"/"expanding". 2-letter abbreviations can be used.
+}
 \item{InsanityFilter}{
 A \code{logical} denoting whether the insanity filter should be used for the forecasted values see Bollerslev, Patton & Quaedvlieg(2016) footnote 17. 
-  }
-\item{HARQargs}{
-A \code{list} denoting the extra arguments of a \code{type} \code{HARQ} model. So far only the boolean \code{demean} is implemented, which determines whether the data should be demeaned as is the case in Bollerslev, Patton & Quaedvlieg(2016)
   }
 }
 \value{
 A \code{\linkS4class{HARForecast}} object
 }
 \details{
-Only the \code{HAR} type model is complete, which means to model more than one period ahead the realized quarticity and the jump component must be modeled separately. This is done by AR(1) processes in both cases.
+Only the \code{HAR} type model is complete, which means to model more than one period ahead the realized quarticity and the continuous part must be modeled separately. This is done by AR(1) processes in all cases.
 
-The maximumm lag of the jump or auxiliary data must be lower than the maximum of the realized measure lag vector, the other cases are not implemented yet.
+The maximumm lag of the continuous or quarticity data must be lower than the maximum of the realized measure lag vector, the other cases are not implemented yet.
+
+The estimates for the HARQ and HARQ-J models differ slightly from the results of BPQ (2016). This is due to a small difference in the demeaning approach for the realized quarticity. Here, the demeaning is done with mean(RQ) over all periods.
 }
 \references{
 Corsi, F. 2009, A Simple Approximate Long-Memory Model
@@ -71,7 +73,7 @@ See Also \code{\link{HARestimate}}
 data("SP500RM")
 SP500rv = SP500RM$RV
 
-ForecastHAR = HARforecast(SP500rv, vLags = c(1,5,22), iNRoll =50,
+ForecastHAR = HARforecast(SP500rv, periods = c(1,5,22), iNRoll =50,
                           iNAhead = 50, type = "HAR")
 
 
@@ -80,12 +82,10 @@ ForecastHAR = HARforecast(SP500rv, vLags = c(1,5,22), iNRoll =50,
 data("SP500RM")
 SP500rv = SP500RM$RV
 SP500bpv = SP500RM$BPV
-vJumpComponent = SP500rv - SP500bpv
-vJumpComponent = ifelse(vJumpComponent>=0, vJumpComponent, 0)
 
 
-ForecastHARJ = HARforecast(SP500rv, vJumpComponent = vJumpComponent, vLags = c(1,5,22),
-                            vJumpLags = c(1,5,22) ,iNRoll = 50,
+ForecastHARJ = HARforecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
+                            periodsJ = c(1,5,22) ,iNRoll = 50,
                             iNAhead = 50, type = "HARJ")
 
 
@@ -96,8 +96,8 @@ data("SP500RM")
 SP500rv = SP500RM$RV
 SP500rq = SP500RM$RQ
 
-ForecastHARQ = HARforecast(SP500rv, vAuxData= SP500rq, vLags = c(1,5,22), 
-                            vAuxLags = c(1,5,22), iNRoll = 50, iNAhead = 50,
+ForecastHARQ = HARforecast(SP500rv, RQ= SP500rq, periods = c(1,5,22), 
+                            periodsRQ = c(1,5,22), iNRoll = 50, iNAhead = 50,
                             type = "HARQ")
 
 
@@ -109,12 +109,10 @@ data("SP500RM")
 SP500rv = SP500RM$RV
 SP500rq = SP500RM$RQ
 SP500bpv = SP500RM$BPV
-vJumpComponent = SP500rv - SP500bpv
-vJumpComponent = ifelse(vJumpComponent>=0, vJumpComponent, 0)
 
-ForecastHARQJ = HARforecast(SP500rv, vAuxData = SP500rq, vJumpComponent = vJumpComponent,
-                             vLags = c(1,5,22), vJumpLags = c(1,5,22), 
-                             vAuxLags = c(1,5,22), iNRoll = 50,
+ForecastHARQJ = HARforecast(SP500rv, RQ = SP500rq, BPV = SP500bpv,
+                             periods = c(1,5,22), periodsJ = c(1,5,22), 
+                             periodsRQ = c(1,5,22), iNRoll = 50,
                              iNAhead = 50, type = "HARQ-J")
 
 }

@@ -3,8 +3,11 @@
 \alias{show,HARForecast-method}
 \alias{plot,HARForecast,missing-method}
 \alias{uncmean,HARForecast-method}
-
 \alias{coef,HARForecast-method}
+\alias{qlike,HARForecast-method}
+\alias{forecastres,HARForecast-method}
+\alias{forecastres,ANY-method}
+\alias{forecastres}
 \docType{class}
 \title{
 HARForecast
@@ -35,6 +38,8 @@ Class for HARForecast object
 \item{\code{plot}:}{\code{signature(x = "HARForecast", y = "missing")}: Plot the out of sample observed series with the forecasts overlayed}
 \item{\code{uncmean}:}{\code{signature(object = "HARForecast")}: Extracts the unconditional mean from the Model}
 \item{\code{coef}:}{\code{signature(object = "HARForecast")}: Extracts the coefficients from the first estimated Model}
+\item{\code{qlike}:}{\code{signature(object = "HARForecast")}: Calculate the out of sample 'qlike' loss function for a HARForecast object}
+\item{\code{forecastres}:}{\code{signature(object = "HARForecast")}: Retrieve the forecast residuals from HARForecast object}
 }}
 \author{Emil Sjoerup}
 \keyword{classes}
