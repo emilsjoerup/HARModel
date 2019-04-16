@@ -19,17 +19,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // HARSimC
-arma::mat HARSimC(int iLength, arma::vec vLags, double dConst, arma::vec vCoef, double dSigma);
-RcppExport SEXP _HARModel_HARSimC(SEXP iLengthSEXP, SEXP vLagsSEXP, SEXP dConstSEXP, SEXP vCoefSEXP, SEXP dSigmaSEXP) {
+arma::mat HARSimC(int iLength, arma::vec vLags, double dConst, arma::vec coef, double dSigma);
+RcppExport SEXP _HARModel_HARSimC(SEXP iLengthSEXP, SEXP vLagsSEXP, SEXP dConstSEXP, SEXP coefSEXP, SEXP dSigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type iLength(iLengthSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type vLags(vLagsSEXP);
     Rcpp::traits::input_parameter< double >::type dConst(dConstSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type vCoef(vCoefSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type coef(coefSEXP);
     Rcpp::traits::input_parameter< double >::type dSigma(dSigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(HARSimC(iLength, vLags, dConst, vCoef, dSigma));
+    rcpp_result_gen = Rcpp::wrap(HARSimC(iLength, vLags, dConst, coef, dSigma));
     return rcpp_result_gen;
 END_RCPP
 }
