@@ -18,6 +18,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// HARMatCombine
+arma::mat HARMatCombine(arma::mat mA, arma::mat mB);
+RcppExport SEXP _HARModel_HARMatCombine(SEXP mASEXP, SEXP mBSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type mA(mASEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type mB(mBSEXP);
+    rcpp_result_gen = Rcpp::wrap(HARMatCombine(mA, mB));
+    return rcpp_result_gen;
+END_RCPP
+}
 // HARSimC
 arma::mat HARSimC(int iLength, arma::vec vLags, double dConst, arma::vec coef, double dSigma);
 RcppExport SEXP _HARModel_HARSimC(SEXP iLengthSEXP, SEXP vLagsSEXP, SEXP dConstSEXP, SEXP coefSEXP, SEXP dSigmaSEXP) {
@@ -48,6 +60,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
+    {"_HARModel_HARMatCombine", (DL_FUNC) &_HARModel_HARMatCombine, 2},
     {"_HARModel_HARSimC", (DL_FUNC) &_HARModel_HARSimC, 5},
     {"_HARModel_fastLMcoef", (DL_FUNC) &_HARModel_fastLMcoef, 2},
     {NULL, NULL, 0}

@@ -5,6 +5,10 @@ HARDataCreationC <- function(vRealizedMeasure, vLags) {
     .Call(`_HARModel_HARDataCreationC`, vRealizedMeasure, vLags)
 }
 
+HARMatCombine <- function(mA, mB) {
+    .Call(`_HARModel_HARMatCombine`, mA, mB)
+}
+
 HARSimC <- function(iLength, vLags, dConst, coef, dSigma) {
     .Call(`_HARModel_HARSimC`, iLength, vLags, dConst, coef, dSigma)
 }

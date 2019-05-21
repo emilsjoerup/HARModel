@@ -10,5 +10,5 @@ importFrom("stats", "lm", "residuals", "rnorm" , "dt" , "sd")
 importFrom("sandwich" , "NeweyWest")
 export(HARestimate, HARforecast, HARsimulate)
 exportClasses("HARModel" ,"HARForecast", "HARSim")
-exportMethods("show" , "plot" , "coef", "uncmean" , "SandwichNeweyWest", "forecastres", "qlike", "summary", "logLik", "confint", "residuals")
+exportMethods("show" , "plot" , "coef", "uncmean" , "SandwichNeweyWest", "forc" , "forecastres", "qlike", "summary", "logLik", "confint", "residuals")
 

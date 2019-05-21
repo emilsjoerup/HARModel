@@ -1,4 +1,4 @@
-setClass("HARModel", slots = c("Model", "Info", "Data"))
+setClass("HARModel", slots = c("Model", "Info"))
 setClass("HARForecast", slots = c("Model", "Forecast", "Info", "Data" ))
 setClass("HARSim", slots = c("Simulation", "Info"))
 
@@ -64,12 +64,12 @@ setMethod("plot" , signature(x= "HARModel", y = "missing"),
                    legend.names = c("Realized Measure" , "Fitted values"), yaxis.right = FALSE, ...){
   vY = x@Model$model$`mData[, 1]`
   vFitted.Val = x@Model$fitted.values
-  vFitted.Val = xts(vFitted.Val, order.by = index(last(x@Data$RealizedMeasure, length(vFitted.Val))))
+  vFitted.Val = xts(vFitted.Val, order.by = x@Info$dates)
   if(is.null(main)) main = paste("Observed vs. fitted based on model: ", x@Info$type)
-  p1 = plot(cbind(vFitted.Val, vY), main = main, col = col, yaxis.right = yaxis.right, ...)
-  p1 = addLegend(legend.loc = legend.loc, legend.names = legend.names,
+  plot(cbind(vFitted.Val, vY), main = main, col = col, yaxis.right = yaxis.right, ...)
+  addLegend(legend.loc = legend.loc, legend.names = legend.names,
                    col = col, lwd = lwd)
-  p1
+  
 })
 
 setMethod("plot" , signature(x = "HARForecast", y = "missing"), 
@@ -79,23 +79,23 @@ setMethod("plot" , signature(x = "HARForecast", y = "missing"),
   vForecastComp = x@Data$`ForecastComparison`
   vRollingForecastplot = xts(x@Forecast[1,], index(vForecastComp))
   if(is.null(main)) main = paste("Observed vs. forecasted based on model: ", x@Info$type)
-  p1 = plot(cbind(vRollingForecastplot,vForecastComp), col = col, main = main, yaxis.right = yaxis.right, ...)
-  p1 = addLegend(legend.loc = legend.loc, legend.names = legend.names, col = col, lwd = lwd)
-  p1
+  plot(cbind(vRollingForecastplot,vForecastComp), col = col, main = main, yaxis.right = yaxis.right, ...)
+  addLegend(legend.loc = legend.loc, legend.names = legend.names, col = col, lwd = lwd)
+  
 })
 
 setMethod("plot" , signature(x = "HARSim" , y = "missing"),
           function(x , length = "ALL" , ctrl = "start", main = "Simulated RV", ...){
   vY = xts(x@Simulation , order.by = as.Date(1:length(x@Simulation), origin = "1970/01/01"))
   if(length == "ALL"){
-    p1 = plot(vY , main = main, ...)
+    plot(vY , main = main, ...)
     }
   else if (ctrl == "start" & is(length,"numeric")){
-    p1 = plot(vY[1:length], main = main, ...)
+    plot(vY[1:length], main = main, ...)
   }else if(ctrl == "end" & is(length,"numeric")){
-    p1 = plot(vY[(length(vY) - length):length(vY)], main = main, ... )
+    plot(vY[(length(vY) - length):length(vY)], main = main, ... )
   }
-  p1
+  
 })
 
 setMethod("coef" , signature(object = "HARModel") , function(object){
@@ -171,6 +171,16 @@ setMethod("SandwichNeweyWest" , signature(object = "HARModel") , function(object
   return("HACmatrix" = mVarCovar)
 })
 
+setGeneric("forc", function(object, WhichStep = 1)
+standardGeneric("forc")  
+)
+
+setMethod("forc", signature(object = "HARForecast"), function(object, WhichStep = 1){
+  vDates = object@Data$ForecastDates + WhichStep-1
+  vForc = xts(object@Forecast[WhichStep,], vDates)
+  return(vForc)
+})
+
 setGeneric("forecastres", function(object)
 standardGeneric("forecastres")
 )
@@ -187,17 +197,17 @@ setGeneric("qlike", function(object)
 )
 
 setMethod("qlike", signature(object = "HARModel"), function(object){
-  RV = object@Data$RealizedMeasure
+  RM = object@Model$model[,1] #extract RM from model
   FV  = object@Model$fitted.values
-  qLike = RV/FV - log(RV / FV) - 1
+  qLike = RM/FV - log(RM / FV) - 1
   return(qLike) 
 }
 )
 
 setMethod("qlike", signature(object = "HARForecast"), function(object){
-  RV = object@Data$ForecastComparison  
+  RM = object@Data$ForecastComparison  #extract observed RM
   FV  = object@Forecast[1,]
-  qLike = RV/FV - log(RV / FV) - 1
+  qLike = RM/FV - log(RM / FV) - 1
   return(qLike) 
 }
 )
@@ -224,3 +234,4 @@ setMethod("summary" , signature(object = "HARModel") , function(object, ...){
   out$call =  as.name("lm(y ~ x)")
   return(out)
 })
+
