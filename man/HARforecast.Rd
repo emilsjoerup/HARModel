@@ -8,7 +8,7 @@ Rolling out of sample forecasting of a HAR model.
 }
 \usage{
 HARforecast(RM, BPV= NULL, RQ = NULL , periods = c(1,5,22), 
-            periodsJ = NULL, periodsRQ = NULL, iNRoll=10 , iNAhead=10 , type = "HAR",
+            periodsJ = NULL, periodsRQ = NULL, iNRoll=10 , iNAhead=1 , type = "HAR",
             windowType = "rolling", InsanityFilter = TRUE)
 }
 \arguments{

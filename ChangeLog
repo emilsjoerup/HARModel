@@ -18,3 +18,7 @@
 2019-04-13 Emil Sjoerup <emilsjoerup@live.dk>
   *Added windowType argument to HARForecast() to allow for expanding window estimation when forecasting.
   *Bugfix in plotting models with non-xts objects.
+  *Implemented the TV-HAR model
+2019-05-08 Emil Sjoerup <emilsjoerup@live.dk>
+  *Re-organized the HARestimate and HARforecast functions to have less repeated code.
+  *Implement method forc to extract the forecasted series.

@@ -8,6 +8,9 @@
 \alias{forecastres,HARForecast-method}
 \alias{forecastres,ANY-method}
 \alias{forecastres}
+\alias{forc,HARForecast-method}
+\alias{forc,ANY-method}
+\alias{forc}
 \docType{class}
 \title{
 HARForecast
@@ -40,6 +43,7 @@ Class for HARForecast object
 \item{\code{coef}:}{\code{signature(object = "HARForecast")}: Extracts the coefficients from the first estimated Model}
 \item{\code{qlike}:}{\code{signature(object = "HARForecast")}: Calculate the out of sample 'qlike' loss function for a HARForecast object}
 \item{\code{forecastres}:}{\code{signature(object = "HARForecast")}: Retrieve the forecast residuals from HARForecast object}
+\item{\code{forc}:}{\code{signature(object = "HARForecast")}: Retrieve the forecasted series.}
 }}
 \author{Emil Sjoerup}
 \keyword{classes}

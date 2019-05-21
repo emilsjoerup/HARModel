@@ -1,12 +1,12 @@
 HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) , 
-                       periodsJ = NULL, periodsRQ = NULL, iNRoll=10 , iNAhead=10 , type = "HAR", windowType = "rolling",
+                       periodsJ = NULL, periodsRQ = NULL, iNRoll=10 , iNAhead=1 , type = "HAR", windowType = "rolling",
                        InsanityFilter = TRUE){
   FCstart.time = Sys.time()
   ######Initialization section ######
   iT            = length(RM)
   iLags         = length(periods)
   iLagsPlusOne  = iLags+1
-  iLagsMax      = max(periods , periodsJ)
+  iLagsMax      = max(periods)
   vObservations = RM[(iLagsMax+1):(iT-iNRoll)]
   vForecastComp = RM[(iT-iNRoll+1):iT] 
   vDates = as.Date((iLagsMax+1):(iT-iNRoll), origin = "1970/01/01")
@@ -30,7 +30,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
          plus the maximum lag.")
   }
   
-  vImplementedTypes = c("HAR" , "HARJ" , "HARQ" , "HARQ-J", "CHAR", "CHARQ")
+  vImplementedTypes = c("HAR" , "HARJ" , "HARQ" , "HARQ-J", "CHAR", "CHARQ", "TV-HAR")
   
   if(!any(grepl(type, vImplementedTypes))){
     cat("type argument not correctly specifiec or is not implemented, available types are:", 
@@ -94,20 +94,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
     } #end for-loop
   }
     FCElapsedTime = Sys.time() - FCstart.time
-    
-    HARForecast = new("HARForecast" , "Model" = HARestimate(RM[1:(iT-iNRoll)], 
-                                                            periods = periods, type = type),
-                      "Forecast" = mForecast, 
-                      "Info" = list("ElapsedTime" =FCElapsedTime,
-                                    "Rolls" = iNRoll ,"Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data" = list("ForecastDates" = vForecastDates,
-                                    "Observations" = xts(vObservations, vDates),
-                                    "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    
-    return(HARForecast)
+
   }# type: "HAR" end
   
   # type: "HARJ" end
@@ -122,6 +109,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           implemented in forecasting yet. periodsJ is set to periods")
       periodsJ = periods
     }
+    iMaxJumpLags     = max(periodsJ)
     iJumpLags        = length(periodsJ)
     iJumpLagsPlusOne = iJumpLags+1
     mForecast = matrix(0 , nrow = iNAhead , ncol = iNRoll) 
@@ -147,8 +135,8 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           }
           if(windowType %in% vIncreasingSynonyms){
           mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
-                                            max(RM[j:(iT-iNRoll+j)]),
-                                            mean(RM[j:(iT-iNRoll+j)]))
+                                            max(RM[1:(iT-iNRoll+j)]),
+                                            mean(RM[1:(iT-iNRoll+j)]))
           }
         } # end insanityfilter conditional
         #Creates the j'th 1-step ahead forecast
@@ -186,7 +174,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
                                                               iLagsMax):length(vForecastfoo)] 
                                               , periods)
           vLastrowJumpdata = HARDataCreationC(vJumpForecastfoo[(length(vJumpForecastfoo) -
-                                                                  iLagsMax):length(vJumpForecastfoo)],
+                                                                iMaxJumpLags):length(vJumpForecastfoo)],
                                               periodsJ)
           mForecast[i,j]   = vCoef[1] + sum(vCoef[-1] * 
                                             c(vLastrowdata[2:iLagsPlusOne], 
@@ -201,7 +189,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
             mJumpForecast[i,j] = dMu + (dBeta^i)*(dJumpY - dMu)
             vLastrowdatafoo    = HARDataCreationC(vForecastfoo , periods)
             vLastrowJumpdata   = HARDataCreationC(vJumpForecastfoo[(length(vJumpForecastfoo) -
-                                                                    iLagsMax):length(vJumpForecastfoo)], 
+                                                                    iMaxJumpLags):length(vJumpForecastfoo)], 
                                                 periodsJ)
             mForecast[i,j]     = vCoef[1] + sum(vCoef[-1]*c(vLastrowdata[2:iLagsPlusOne], 
                                                             vLastrowJumpdata[2:iJumpLagsPlusOne]))
@@ -214,23 +202,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
       } #end for-loop
     }
     FCElapsedTime = Sys.time() - FCstart.time
-    
-    HARForecast = new("HARForecast" , 
-                      "Model" = HARestimate(RM[1:(iT-iNRoll)], 
-                                            BPV[1:(iT-iNRoll)],
-                                            periods = periods, periodsJ = periodsJ,  
-                                            type = type) ,
-                      "Forecast" = mForecast, 
-                      "Info" = list("ElapsedTime" =FCElapsedTime, 
-                                    "Rolls" = iNRoll ,"Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data" = list("ForecastDates" = vForecastDates,
-                                    "Observations" = xts(vObservations, vDates),
-                                    "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    
-    return(HARForecast)
+
   }#type: "HARJ" end
   
   if(type == "HARQ"){
@@ -269,8 +241,8 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           } 
           if(windowType %in% vIncreasingSynonyms){
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
-                                              max(RM[j:(iT-iNRoll+j)]),
-                                              mean(RM[j:(iT-iNRoll+j)]))
+                                              max(RM[1:(iT-iNRoll+j)]),
+                                              mean(RM[1:(iT-iNRoll+j)]))
           }
         } # end insanityfilter conditional
         #Creates the j'th 1-step ahead forecast
@@ -343,22 +315,6 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
       } #end for-loop
     }
     FCElapsedTime = Sys.time() - FCstart.time
-
-    HARForecast = new("HARForecast" , 
-                      "Model"    = HARestimate(RM[1:(iT-iNRoll)], 
-                                               RQ = RQ[1:(iT-iNRoll)],
-                                               periods = periods, periodsRQ = periodsRQ, type = type),
-                      "Forecast" = mForecast, 
-                      "Info"     = list("ElapsedTime" = FCElapsedTime , "Rolls" = iNRoll,
-                                        "Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data" = list("ForecastDates" = vForecastDates,
-                                    "Observations" = xts(vObservations, vDates),
-                                    "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    
-    return(HARForecast)
   }#type: "HARQ" end
   
   if(type == "HARQ-J"){
@@ -384,8 +340,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
       periodsJ = periods
     }
     iMaxAuxLags      = max(periodsRQ)
-    iJumpLags        = length(periodsJ)
-    iJumpLagsPlusOne = iJumpLags+1
+    iMaxJumpLags     = max(periodsJ)
     mJumpForecast    = matrix(0 , nrow = iNAhead, ncol = iNRoll )
     mForecast        = matrix(0 , nrow = iNAhead , ncol = iNRoll) 
     mAuxForecast     = matrix(0, nrow = iNAhead, ncol = iNRoll)
@@ -413,8 +368,8 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           } 
           if(windowType %in% vIncreasingSynonyms){
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
-                                              max(RM[j:(iT-iNRoll+j)]),
-                                              mean(RM[j:(iT-iNRoll+j)]))
+                                              max(RM[1:(iT-iNRoll+j)]),
+                                              mean(RM[1:(iT-iNRoll+j)]))
           }
         } # end insanityfilter conditional
         #Creates the j'th 1-step ahead forecast
@@ -460,7 +415,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           vJumpForecastfoo  = c(vThisRollJump[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)],
                                 mJumpForecast[1:(i-1)],j) 
           vLastrowJumpdata  = HARDataCreationC(vJumpForecastfoo[(length(vJumpForecastfoo) -
-                                                                   iLagsMax) : length(vJumpForecastfoo)],
+                                                                   iMaxJumpLags) : length(vJumpForecastfoo)],
                                                periodsJ)
           #Gets the data necessary to form the forecast in one vector. 
           vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) - 
@@ -483,7 +438,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
             vForecastAuxFoo   = mAuxForecast[(i-iLagsMax):i, j] 
             vJumpForecastfoo  = mJumpForecast[(i-iLagsMax):i, j]
             vLastrowJumpdata  = HARDataCreationC(vJumpForecastfoo[(length(vJumpForecastfoo) 
-                                                                   - iLagsMax) : length(vJumpForecastfoo)], 
+                                                                   - iMaxJumpLags) : length(vJumpForecastfoo)], 
                                                  periodsJ)
             #data preparation
             vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) -
@@ -510,21 +465,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
     }
     FCElapsedTime = Sys.time() - FCstart.time
     
-    HARForecast = new("HARForecast" , 
-                      "Model"    = HARestimate(RM[1:(iT-iNRoll)], RQ = RQ[1:(iT-iNRoll)]
-                                               , BPV = BPV[1:(iT-iNRoll)],
-                                               periods = periods ,periodsJ = periodsJ, periodsRQ=periodsRQ , 
-                                               type = type) ,
-                      "Forecast" = mForecast, 
-                      "Info"     = list("ElapsedTime" = FCElapsedTime , "Rolls" = iNRoll,
-                                        "Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data"     = list("ForecastDates" = vForecastDates,
-                                        "Observations" = xts(vObservations, vDates),
-                                        "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    return(HARForecast)
+
   }#type: "HARQ-J" end
   
   if(type == "CHAR"){
@@ -539,11 +480,11 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
         }
         if(windowType %in% vIncreasingSynonyms){
           lFit = FASTCHARestimate(RM[1:(iT-iNRoll+j)], BPV[1:(iT-iNRoll+j)], 
-                                  periods, iN)
+                                  periods, iN + j -1)
         }
         mData            = lFit$mData[,-1]
         vCoef            = lFit$coefficients
-        mForecast[1,j] = vCoef[1] + sum(vCoef[-1]*mData[dim(mData)[1] ,])
+        mForecast[1,j]   = vCoef[1] + sum(vCoef[-1]*mData[dim(mData)[1] ,])
         if(InsanityFilter){
           if(windowType %in% vRollingSynonyms){
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
@@ -552,8 +493,8 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
           } 
           if(windowType %in% vIncreasingSynonyms){
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
-                                              max(RM[j:(iT-iNRoll+j)]),
-                                              mean(RM[j:(iT-iNRoll+j)]))
+                                              max(RM[1:(iT-iNRoll+j)]),
+                                              mean(RM[1:(iT-iNRoll+j)]))
           }
         } # end insanityfilter conditional
         #Creates the j'th 1-step ahead forecast
@@ -568,9 +509,10 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
         if(windowType %in% vIncreasingSynonyms){
          vThisRoll        = as.numeric(RM[1:(iT-iNRoll+j)])
          vThisRollBPV     = as.numeric(BPV[1:(iT-iNRoll+j)])
+         iN = iT-iNRoll+j
         }
-        lFit             = FASTHARQestimate(vThisRoll, vThisRollBPV, periods, iN)
-        mBPVFoo          = HARDataCreationC(vThisRollRQ , c(1)) 
+        lFit             = FASTCHARestimate(vThisRoll, vThisRollBPV, periods, iN)
+        mBPVFoo          = HARDataCreationC(vThisRollBPV , c(1)) 
         dBPVY            = BPV[(iT-iNRoll+j-1)]
         lBPVFit          = fastLMcoef(cbind(1,mBPVFoo[,2]),mBPVFoo[,1]) 
         dAlpha           = lBPVFit[1]
@@ -584,29 +526,21 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
         
         for (i in 2:(min((iLagsMax), iNAhead))) {
           
-          vForecastfoo      = c(vThisRoll[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)] , mForecast[1:(i-1) , j]) 
-          vForecastBPVFoo   = c(vThisRollRQ[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)],
+          vForecastBPVFoo   = c(vThisRollBPV[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)],
                                 mBPVForecast[1:(i-1) , j])
           #Gets the data necessary to form the forecast in one vector. 
-          vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) -
-                                                               iLagsMax):length(vForecastfoo)]
-                                               , periods)
           vLastrowBPVdata   = HARDataCreationC(vForecastBPVFoo[(length(vForecastBPVFoo) -
                                                                   iLagsMax) : length(vForecastBPVFoo)] 
                                                , periods)
           #Creates the j'th i-step ahead forecast
           mBPVForecast[i,j] = dMu + (dBeta^i)*(dBPVY - dMu)
-          mForecast[i,j]    = vCoef[1] + sum(vCoef[-1]* c(vLastrowdata[-1] , vLastrowBPVdata[-1]))
+          mForecast[i,j]    = vCoef[1] + sum(vCoef[-1]* c(vLastrowBPVdata[-1]))
           
         } #end first nested for-loop
         if(iNAhead>iLagsMax){
           for (i in (iLagsMax+1):(iNAhead)) {
-            vForecastfoo      = mForecast[(i-iLagsMax):i , j] 
-            vForecastBPVFoo   =  mBPVForecast[(i-iLagsMax):i, j]
+            vForecastBPVFoo   = mBPVForecast[(i-iLagsMax):i, j]
             #Gets the data necessary to form the forecast in one vector. 
-            vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) -
-                                                                 iLagsMax) : length(vForecastfoo)],
-                                                 periods)
             vLastrowBPVdata   = HARDataCreationC(vForecastBPVFoo[(length(vForecastBPVFoo) -
                                                                     iLagsMax) : length(vForecastBPVFoo)],
                                                  periods)
@@ -614,32 +548,18 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
             
             #Gets the data necessary to form the forecast in one vector.
             
-            mForecast[i,j] = vCoef[1] + sum(vCoef[-1]* c(vLastrowBPVdata[-1] , vLastrowBPVdata[,-1]))
+            mForecast[i,j] = vCoef[1] + sum(vCoef[-1]* vLastrowBPVdata[,-1])
             
             #Creates the j'th i-step ahead forecast
           } #End second nested for-loop
         } 
         if(InsanityFilter){
-          mForecast[,j] = HARinsanityFilter(mForecast[,j] , 0 , max(vThisRoll) , sum(vThisRoll)/length(vThisRoll))
+          mForecast[,j] = HARinsanityFilter(mForecast[,j] , 0 , max(vThisRoll) , mean(vThisRoll))
         } # end insanityfilter conditional
       } #end for-loop
     }
     FCElapsedTime = Sys.time() - FCstart.time
-    
-    HARForecast = new("HARForecast" , 
-                      "Model"    = HARestimate(RM[1:(iT-iNRoll)], 
-                                               BPV = BPV[1:(iT-iNRoll)],
-                                               periods = periods, periodsRQ = periodsRQ, type = type),
-                      "Forecast" = mForecast, 
-                      "Info"     = list("ElapsedTime" = FCElapsedTime , "Rolls" = iNRoll,
-                                        "Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data" = list("ForecastDates" = vForecastDates,
-                                    "Observations" = xts(vObservations, vDates),
-                                    "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    
-    return(HARForecast)
+
   }#type: "CHAR" end
   
   
@@ -652,16 +572,16 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
     if(iNAhead == 1){
       for (j in 1:(iNRoll)) {
         if(windowType %in% vRollingSynonyms){
-        lFit = FASTCHARestimate(RM[j:(iT-iNRoll+j)], BPV[j:(iT-iNRoll+j)], 
-                                periods, iN)
+        lFit = FASTCHARQestimate(RM[j:(iT-iNRoll+j)], BPV[j:(iT-iNRoll+j)], RQ[j:(iT-iNRoll+j)],
+                                periods, periodsRQ, iN)
         } 
         if(windowType %in% vIncreasingSynonyms){
-        lFit = FASTCHARestimate(RM[1:(iT-iNRoll+j)], BPV[1:(iT-iNRoll+j)], 
-                                periods, iN)
+        lFit = FASTCHARQestimate(RM[1:(iT-iNRoll+j)], BPV[1:(iT-iNRoll+j)], RQ[1:(iT-iNRoll+j)], 
+                                periods, periodsRQ, iN + j -1)
         }
         mData            = lFit$mData[,-1]
         vCoef            = lFit$coefficients
-        mForecast[1,j] = vCoef[1] + sum(vCoef[-1]*mData[dim(mData)[1] ,])
+        mForecast[1,j]   = vCoef[1] + sum(vCoef[-1]*mData[dim(mData)[1] ,])
         if(InsanityFilter){
           if(windowType %in% vRollingSynonyms){
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
@@ -669,8 +589,8 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
                                               mean(RM[j:(iT-iNRoll+j)]))
           } else {
             mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
-                                              max(RM[j:(iT-iNRoll+j)]),
-                                              mean(RM[j:(iT-iNRoll+j)]))
+                                              max(RM[1:(iT-iNRoll+j)]),
+                                              mean(RM[1:(iT-iNRoll+j)]))
           }
         } # end insanityfilter conditional
         #Creates the j'th 1-step ahead forecast
@@ -687,6 +607,7 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
         vThisRollRQ      = as.numeric(RQ[1:(iT-iNRoll+j)])
         vThisRoll        = as.numeric(RM[1:(iT-iNRoll+j)])
         vThisRollBPV     = as.numeric(BPV[1:(iT-iNRoll+j)])
+        iN = iT-iNRoll+j
         }
         lFit             = FASTCHARQestimate(vThisRoll, vThisRollBPV, vThisRollRQ, periods, periodsRQ,iN)
         ##BPV modeling
@@ -712,15 +633,12 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
         
         for (i in 2:(min((iLagsMax), iNAhead))) {
           
-          vForecastfoo      = c(vThisRoll[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)] , mForecast[1:(i-1) , j]) 
+          
           vForecastBPVFoo   = c(vThisRollRQ[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)],
                                 mBPVForecast[1:(i-1) , j])
           vForecastAuxFoo   = c(sqrt(vThisRollRQ[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)]),
                                 mAuxForecast[1:(i-1) , j])
           #data preparation
-          vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) -
-                                                               iLagsMax):length(vForecastfoo)]
-                                               , periods)
           vLastrowBPVdata   = HARDataCreationC(vForecastBPVFoo[(length(vForecastBPVFoo) -
                                                                   iLagsMax) : length(vForecastBPVFoo)] 
                                                , periods)
@@ -728,20 +646,16 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
                                                                   iMaxAuxLags):length(vForecastAuxFoo)], 
                                                periodsRQ)
           #Creates the j'th i-step ahead forecasts
-          mAuxForecast[i,j] = dAuxMu + (dAuxBeta^i)*(dAuxY - dAuxMu)
+          mAuxForecast[i,j] = dMuRQ + (dBetaRQ^i)*(dAuxY - dMuRQ)
           mBPVForecast[i,j] = dMu + (dBeta^i)*(dBPVY - dMu)
-          mForecast[i,j]    = vCoef[1] + sum(vCoef[-1]* c(vLastrowdata[-1] , vLastrowBPVdata[-1]))
+          mForecast[i,j]    = vCoef[1] + sum(vCoef[-1]* c(vLastrowBPVdata[-1], vLastrowAuxdata[,-1]))
           
         } #end first nested for-loop
         if(iNAhead>iLagsMax){
           for (i in (iLagsMax+1):(iNAhead)) {
-            vForecastfoo      = mForecast[(i-iLagsMax):i , j] 
             vForecastAuxFoo   = mAuxForecast[(i-iLagsMax):i, j] 
             vForecastBPVFoo   =  mBPVForecast[(i-iLagsMax):i, j]
             #Gets the data necessary to form the forecast in one vector. 
-            vLastrowdata      = HARDataCreationC(vForecastfoo[(length(vForecastfoo) -
-                                                                 iLagsMax) : length(vForecastfoo)],
-                                                 periods)
             vLastrowBPVdata   = HARDataCreationC(vForecastBPVFoo[(length(vForecastBPVFoo) -
                                                                     iLagsMax) : length(vForecastBPVFoo)],
                                                  periods)
@@ -749,39 +663,112 @@ HARforecast = function(RM, BPV = NULL, RQ = NULL , periods = c(1,5,22) ,
                                                                     iMaxAuxLags) : length(vForecastAuxFoo)] ,
                                                  periodsRQ)
             mBPVForecast[i,j] = dMu + (dBeta^i)*(dBPVY - dMu)
-            
-            mAuxForecast[i,j] = dAuxMu + (dAuxBeta^i)*(dAuxY - dAuxMu)
-            mForecast[i,j] = vCoef[1] + sum(vCoef[-1]* c(vLastrowBPVdata[-1] , vLastrowBPVdata[,-1]))
+            mAuxForecast[i,j] = dMuRQ + (dBetaRQ^i)*(dAuxY - dMuRQ)
+            mForecast[i,j]    = vCoef[1] + sum(vCoef[-1]* c(vLastrowBPVdata[-1], vLastrowAuxdata[,-1]))
             
             #Creates the j'th i-step ahead forecast
           } #End second nested for-loop
         } 
         if(InsanityFilter){
-          mForecast[,j] = HARinsanityFilter(mForecast[,j] , 0 , max(vThisRoll) , sum(vThisRoll)/length(vThisRoll))
+          mForecast[,j] = HARinsanityFilter(mForecast[,j] , 0 , max(vThisRoll) , mean(vThisRoll))
         } # end insanityfilter conditional
       } #end for-loop
     }
     FCElapsedTime = Sys.time() - FCstart.time
     
-    HARForecast = new("HARForecast" , 
-                      "Model"    = HARestimate(RM[1:(iT-iNRoll)], 
-                                               BPV = BPV[1:(iT-iNRoll)],
-                                               RQ  = RQ[1:(iT-iNRoll)],
-                                               periods = periods, periodsRQ = periodsRQ, type = type),
-                      "Forecast" = mForecast, 
-                      "Info"     = list("ElapsedTime" = FCElapsedTime , "Rolls" = iNRoll,
-                                        "Horizon" = iNAhead , "type" = type, "windowType" = windowType),
-                      "Data" = list("ForecastDates" = vForecastDates,
-                                    "Observations" = xts(vObservations, vDates),
-                                    "ForecastComparison" = xts(vForecastComp, vForecastDates)))
-    colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
-    rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
-    
-    return(HARForecast)
+
   }#type: "CHARQ" end
+
+  ### type: "TV-HAR"
+  if(type == "TV-HAR"){
+    mForecast = matrix(0 , nrow = iNAhead , ncol = iNRoll) 
+    if(iNAhead == 1){
+      
+      for (j in 1:iNRoll) {
+        if(windowType %in% vRollingSynonyms){
+          lFit           = FASTTVHARestimate(RM[j:(iT-iNRoll+j)] , periods)
+        }else{
+          lFit           = FASTTVHARestimate(RM[1:(iT-iNRoll+j)] , periods)  
+        }
+        mData          = lFit$mData[,-1]
+        vCoef          = lFit$coefficients
+        mForecast[1,j] = vCoef[1] + sum(vCoef[-1]*mData[nrow(mData),])
+        #Creates the j'th 1-step ahead forecast
+        if(InsanityFilter){
+          if(windowType %in% vRollingSynonyms){
+            mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
+                                              max(RM[j:(iT-iNRoll+j)]),
+                                              mean(RM[j:(iT-iNRoll+j)]))
+          } else {
+            mForecast[,j] = HARinsanityFilter(mForecast[,j], 0,
+                                              max(RM[j:(iT-iNRoll+j)]),
+                                              mean(RM[j:(iT-iNRoll+j)]))
+          }
+        } # end insanityfilter conditional
+      } # End loop
+    }# End one-step ahead conditionals
+    else{
+      for (j in 1:(iNRoll)){
+        if(windowType %in% vRollingSynonyms){
+          vThisRoll      = as.numeric(RM[j:(iT-iNRoll+j)]) #pass as.numeric
+        }
+        if(windowType %in% vIncreasingSynonyms){
+          vThisRoll      = as.numeric(RM[1:(iT-iNRoll+j)]) #pass as.numeric
+        }
+        lFit           = FASTTVHARestimate(vThisRoll , periods)
+        mData          = lFit$mData[,-1]
+        vCoef          = lFit$coefficients
+        #Creates the j'th 1-step ahead forecast
+        mForecast[1,j] = vCoef[1] + sum(vCoef[-1] * mData[nrow(mData),])
+        
+        
+        for (i in 2:(min((iLagsMax), iNAhead))) {
+          vForecastfoo = c(vThisRoll[(iT-iNRoll-iLagsMax+i) : (iT-iNRoll+1)] , mForecast[1:(i-1) , j]) 
+          #Gets the data necessary to form the forecast in one vector. 
+          vLastrowdata = HARDataCreationC(vForecastfoo[(length(vForecastfoo) - iLagsMax):length(vForecastfoo)],
+                                          periods)
+          #Creates the j'th i-step ahead forecast
+          mForecast[i,j] = vCoef[1] + sum(vCoef[-1]* c(vLastrowdata[2], 
+                                                       abs(vLastrowdata[2]-vLastrowdata[iLagsPlusOne]), #difference
+                                                       vLastrowdata[3:iLagsPlusOne]))
+          
+        } #end first nested for-loop
+        if(iNAhead>iLagsMax){
+          for (i in (iLagsMax+1):(iNAhead)) {
+            vForecastfoo    = mForecast[(i-iLagsMax):i , j] 
+            vLastrowdatafoo = HARDataCreationC(vForecastfoo , periods)
+            #Gets the data necessary to form the forecast in one vector.
+            mForecast[i,j] = vCoef[1] + sum(vCoef[-1]* c(vLastrowdata[2], 
+                                                         abs(vLastrowdata[2]-vLastrowdata[iLagsPlusOne]), #difference
+                                                         vLastrowdata[3:iLagsPlusOne]))
+            #Creates the j'th i-step ahead forecast
+          } #End second nested for-loop
+        } 
+        if(InsanityFilter){
+          mForecast[,j] = HARinsanityFilter(mForecast[,j] , 0 , max(vThisRoll) , sum(vThisRoll)/length(vThisRoll))
+        }
+      } #end for-loop
+    }
+    FCElapsedTime = Sys.time() - FCstart.time
+
+  }# type: "TV-HAR" end
   
-  ######Forecasting end #######
-  sError = "something unexpected happened, please report bug."
-  show(sError)
-  return(sError)
+
+  
+  HARForecast = new("HARForecast" , 
+                    "Model"    = HARestimate(RM[1:(iT-iNRoll)], 
+                                             BPV = BPV[1:(iT-iNRoll)],
+                                             RQ  = RQ[1:(iT-iNRoll)],
+                                             periods = periods, periodsRQ = periodsRQ, type = type),
+                    "Forecast" = mForecast, 
+                    "Info"     = list("ElapsedTime" = FCElapsedTime , "Rolls" = iNRoll,
+                                      "Horizon" = iNAhead , "type" = type, "windowType" = windowType),
+                    "Data" = list("ForecastDates" = vForecastDates,
+                                  "Observations" = xts(vObservations, vDates),
+                                  "ForecastComparison" = xts(vForecastComp, vForecastDates)))
+  colnames(HARForecast@Forecast) = paste0("roll", 1:iNRoll)
+  rownames(HARForecast@Forecast) = paste0("step", 1:iNAhead)
+  
+  return(HARForecast)
+  
 }

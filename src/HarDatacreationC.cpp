@@ -24,3 +24,24 @@ arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags){
   }
   return(mHARData);
 }
+
+//[[Rcpp::export]]
+arma::mat HARMatCombine(arma::mat mA, arma::mat mB){
+  int iRowsA = mA.n_rows;
+  int iRowsB = mB.n_rows;
+  arma:: vec vFoo(2); vFoo << iRowsA << iRowsB <<endr;
+  arma::mat mC((arma::min(vFoo)), (mA.n_cols+mB.n_cols));
+  if(iRowsA > iRowsB){
+    mA.shed_rows(0, iRowsA-iRowsB-1);
+  }
+  if(iRowsA < iRowsB){
+    mB.shed_rows(0, iRowsB-iRowsA-1);
+  }
+  
+  mC = join_rows(mA, mB);
+  
+  return(mC);
+  
+  
+  
+}
