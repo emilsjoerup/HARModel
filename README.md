@@ -6,5 +6,3 @@ If you find any bugs or think improvements can be made, please contact me at:
 
 emilsjoerup@live.dk
 
-TODO: 
-Add CHAR and extensions thereof. Done, will be included in next update.
