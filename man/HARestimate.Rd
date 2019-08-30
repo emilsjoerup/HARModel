@@ -1,5 +1,5 @@
-\name{HARestimate}
-\alias{HARestimate}
+\name{HAREstimate}
+\alias{HAREstimate}
 \title{
 HAR estimation
 }
@@ -7,9 +7,9 @@ HAR estimation
 HAR estimation
 }
 \usage{
-HARestimate(RM, BPV = NULL, RQ = NULL, periods = c(1,5,22),
+HAREstimate(RM, BPV = NULL, RQ = NULL, periods = c(1,5,22),
             periodsJ = NULL, periodsRQ = NULL, type = "HAR",
-            InsanityFilter = TRUE)
+            insanityFilter = TRUE, h = 1)
 }
 \arguments{
   \item{RM}{
@@ -33,8 +33,11 @@ A \code{numeric} denoting which lags should be used in Realized Quarticity estim
   \item{type}{
 A \code{character} denoting which type of HAR model to estimate.
   }
-  \item{InsanityFilter}{
+  \item{insanityFilter}{
 A \code{logical} denoting whether the insanity filter should be used for the fitted values of the estimation see Bollerslev, Patton & Quaedvlieg(2016) footnote 17. 
+  }
+  \item{h}{
+A \code{integer} denoting the whether and how much to aggregate the realized variance estimator, if h = 5 the model is for the weekly volatility and if h = 22, the model is for the monthly volatility, the default of 1 designates no aggregation.
   }
 }
 \value{
@@ -57,7 +60,18 @@ Emil Sjoerup
 data("SP500RM")
 SP500rv = SP500RM$RV
 #Estimate the HAR model:
-FitHAR = HARestimate(RM = SP500rv, periods = c(1,5,22))
+FitHAR = HAREstimate(RM = SP500rv, periods = c(1,5,22))
+
+#extract the estimated coefficients:
+coef(FitHAR)
+#plot the fitted values
+plot(FitHAR)
+
+#calculate the Q-like loss-function:
+mean(qlike(FitHAR))
+
+
+
 
 #HAR-J:
 #load data
@@ -66,19 +80,33 @@ SP500rv = SP500RM$RV
 SP500bpv = SP500RM$BPV
 
 #Estimate the HAR-J model:
-FitHARJ = HARestimate(RM = SP500rv, BPV = SP500bpv, 
+FitHARJ = HAREstimate(RM = SP500rv, BPV = SP500bpv, 
                        periods = c(1,5,22), periodsJ = c(1,5,22),  type = "HARJ" )
 
-#HAR-Q of BPQ(2016)
+#Calculate the Q-like loss-function:
+mean(qlike(FitHARJ))
+
+
+
+
+#HAR-Q of BPQ(2016) with weekly aggregation
 #load data
 data("SP500RM")
 SP500rv = SP500RM$RV
 SP500rq = SP500RM$RQ
 #Estimate the HAR-Q model:
-FitHARQ = HARestimate(RM = SP500rv, RQ = SP500rq, periods = c(1,5,22),
-                       periodsRQ = c(1,5,22),  type = "HARQ")
+FitHARQ = HAREstimate(RM = SP500rv, RQ = SP500rq, periods = c(1,5,22),
+                       periodsRQ = c(1,5,22),  type = "HARQ", h = 5)
+#Show the model:
+show(FitHARQ)
 
-#HARQ-J of BPQ(2016)
+#Extract the coefficients:
+HARQcoef = coef(FitHARQ)
+
+
+
+
+#HARQ-J of BPQ(2016) with monthly aggregation
 #load data
 data("SP500RM")
 SP500rv = SP500RM$RV
@@ -86,10 +114,13 @@ SP500rq = SP500RM$RQ
 SP500bpv = SP500RM$BPV
 
 #Estimate the HARQ-J model:
-FitHARQJ = HARestimate(RM = SP500rv, BPV = SP500bpv,
+FitHARQJ = HAREstimate(RM = SP500rv, BPV = SP500bpv,
                         RQ = SP500rq, periods = c(1,5,22),
-                        periodsJ = c(1,5,22), periodsRQ = c(1), 
-                        type = "HARQ-J")
+                        periodsJ = c(1), periodsRQ = c(1), 
+                        type = "HARQ-J", h = 22)
+#show the model:
+show(FitHARQJ)
+
 
 
 }

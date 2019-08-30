@@ -1,29 +1,40 @@
 #include <RcppArmadillo.h>
 
 using namespace arma;
+
 //[[Rcpp::export]]
-arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags){
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags, int h = 1){
   int iT       = vRealizedMeasure.size();
   int iLags    = vLags.size();
   int iMaxLags = max(vLags);
-  arma::mat mHARData((iT - iMaxLags) , (iLags + 1));
+  arma::mat mHARData((iT - iMaxLags-h+1) , (iLags + 1));
   int k = 0;
-  
-  mHARData.col(0) = vRealizedMeasure(arma::span((iMaxLags) , (iT-1)));
-  
   if(vLags[0] == 1){
-    mHARData.col(1) = vRealizedMeasure(arma::span(iMaxLags-1 , (iT - 2)));
+    mHARData.col(1) = vRealizedMeasure(arma::span(iMaxLags-1 , (iT - h-1)));
     k = 1;
   }
   
   for(int i = k; i<iLags; i++){
-    for(int j = 0; j<(iT - iMaxLags); j++){
+    for(int j = 0; j<(iT - iMaxLags-h+1); j++){
       mHARData(j,(i+1)) = sum(vRealizedMeasure(arma::span((iMaxLags + j - vLags[i]) , (iMaxLags + j - 1) )))/vLags[i];
+    }
+  }
+  
+  if(h != 1){ //need to aggregate the dependent variable too.
+    for(int j = 0; j<=(iT - iMaxLags-h); j++){
+      mHARData(j,0) = sum(vRealizedMeasure(arma::span((iMaxLags + j) , (iMaxLags + j+h-1))))/h;
     }
     
   }
+  else{
+    mHARData.col(0) = vRealizedMeasure(arma::span((iMaxLags) , (iT-1)));
+  }
+  
   return(mHARData);
 }
+
+
+
 
 //[[Rcpp::export]]
 arma::mat HARMatCombine(arma::mat mA, arma::mat mB){

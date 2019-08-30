@@ -7,14 +7,15 @@
 using namespace Rcpp;
 
 // HARDataCreationC
-arma::mat HARDataCreationC(arma::vec vRealizedMeasure, arma::vec vLags);
-RcppExport SEXP _HARModel_HARDataCreationC(SEXP vRealizedMeasureSEXP, SEXP vLagsSEXP) {
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure, arma::vec vLags, int h);
+RcppExport SEXP _HARModel_HARDataCreationC(SEXP vRealizedMeasureSEXP, SEXP vLagsSEXP, SEXP hSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type vRealizedMeasure(vRealizedMeasureSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type vLags(vLagsSEXP);
-    rcpp_result_gen = Rcpp::wrap(HARDataCreationC(vRealizedMeasure, vLags));
+    Rcpp::traits::input_parameter< int >::type h(hSEXP);
+    rcpp_result_gen = Rcpp::wrap(HARDataCreationC(vRealizedMeasure, vLags, h));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -59,7 +60,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 2},
+    {"_HARModel_HARDataCreationC", (DL_FUNC) &_HARModel_HARDataCreationC, 3},
     {"_HARModel_HARMatCombine", (DL_FUNC) &_HARModel_HARMatCombine, 2},
     {"_HARModel_HARSimC", (DL_FUNC) &_HARModel_HARSimC, 5},
     {"_HARModel_fastLMcoef", (DL_FUNC) &_HARModel_fastLMcoef, 2},
