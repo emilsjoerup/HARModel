@@ -7,8 +7,6 @@ using namespace arma;
 
 
 arma::vec fastLMcoef(arma::mat X, arma::colvec y){
-  
-  
   arma::vec coef = arma::solve(X, y);
   return(coef);
   //only returns the coefficients, taken from Dirk Eddelbuettel

@@ -3,20 +3,20 @@
 using namespace arma;
 
 //[[Rcpp::export]]
-arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vLags, int h = 1){
+arma::mat HARDataCreationC(arma::vec vRealizedMeasure , arma::vec vPeriods, int h = 1){
   int iT       = vRealizedMeasure.size();
-  int iLags    = vLags.size();
-  int iMaxLags = max(vLags);
+  int iLags    = vPeriods.size();
+  int iMaxLags = max(vPeriods);
   arma::mat mHARData((iT - iMaxLags-h+1) , (iLags + 1));
   int k = 0;
-  if(vLags[0] == 1){
+  if(vPeriods[0] == 1){
     mHARData.col(1) = vRealizedMeasure(arma::span(iMaxLags-1 , (iT - h-1)));
     k = 1;
   }
   
   for(int i = k; i<iLags; i++){
     for(int j = 0; j<(iT - iMaxLags-h+1); j++){
-      mHARData(j,(i+1)) = sum(vRealizedMeasure(arma::span((iMaxLags + j - vLags[i]) , (iMaxLags + j - 1) )))/vLags[i];
+      mHARData(j,(i+1)) = sum(vRealizedMeasure(arma::span((iMaxLags + j - vPeriods[i]) , (iMaxLags + j - 1) )))/vPeriods[i];
     }
   }
   
