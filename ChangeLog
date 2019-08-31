@@ -8,7 +8,6 @@
   *Bug fix in forecasting.
   *Forecasts are now output as a named matrix
   *Remove function HARMonteCarlo
-  *Rewrote the datacreation function with the armadillo library and optimized it - this increased the speed of the this step by almost 50%
   *Rename uncondmean to uncmean
 2019-03-19 Emil Sjoerup <emilsjoerup@live.dk>
   *DESCRIPTION (Version): New version is 0.3
@@ -22,3 +21,15 @@
 2019-05-08 Emil Sjoerup <emilsjoerup@live.dk>
   *Re-organized the HARestimate and HARforecast functions to have less repeated code.
   *Implement method forc to extract the forecasted series.
+2019-07-02 Emil Sjoerup <emilsjoerup@live.dk>
+  *Fix plotting method, the colors and legend was in the wrong order. Now lines() is used instead of plot.xts(cbind)
+2019-08-14 Emil Sjoerup <emilsjoerup@live.dk>
+  *Finish implementing the h-models i.e. weekly or monthly RV estimation
+  *Implemented h-forecasting i.e. weekly or monthly RV forecasting (only 1 period ahead.)
+2019-08-14 Emil Sjoeurp <emilsjoerup@live.dk>
+  *Change the name from iNAhead and iNRoll to nAhead and nRoll respectively
+  *Change shift over to camelCase where appropriate
+2019-08-19 Emil Sjoerup <emilsjoerup@live.dk>
+  *DESCRIPTION (version): New version is 1.0 as the API has changed.
+  *Move to camelCase for all user-level interactions with the software.
+  

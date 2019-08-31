@@ -5,12 +5,12 @@
 \alias{uncmean,HARForecast-method}
 \alias{coef,HARForecast-method}
 \alias{qlike,HARForecast-method}
-\alias{forecastres,HARForecast-method}
-\alias{forecastres,ANY-method}
-\alias{forecastres}
-\alias{forc,HARForecast-method}
-\alias{forc,ANY-method}
-\alias{forc}
+\alias{forecastRes,HARForecast-method}
+\alias{forecastRes,ANY-method}
+\alias{forecastRes}
+\alias{getForc,HARForecast-method}
+\alias{getForc,ANY-method}
+\alias{getForc}
 \docType{class}
 \title{
 HARForecast
@@ -21,16 +21,16 @@ Class for HARForecast object
 \section{Objects from the Class}{A virtual Class: No objects may be created from it}
 \section{Slots}{
   \describe{
-    \item{\code{Model}:}{Object of class \code{HARModel}. see \link{HARModel} }
-    \item{\code{Forecast}:}{Object of class \code{matrix} containing the forecasted series}
-    \item{\code{Info}:}{Object of class \code{list} cointaining:}
-    \itemize{\item{\code{Elapsed Time}:} Object of class \code{difftime} containing the time elapsed in seconds
-    \item{\code{Rolls}:} \code{Integer}  containing the amount of rolls done in the forecasting routine
-    \item{\code{Horizon}:} \code{Integer} containing the length of the horizon used for forecasting during each of the rolls}
-    \item{\code{Data}:}{Object of class \code{list} containing:}
-    \itemize{\item{\code{Dates}:}Object of type \code{Integer} or \code{Date} containing the indices of the forecasted series either in integer or date format
-    \item{\code{Observations}:}Object of type \code{numeric} or \code{xts} containing the in-sample observations
-    \item{\code{ForecastComparison}:} Object of type \code{numeric} or \code{xts} containing the observations kept out of sample for the first roll
+    \item{\code{model}:}{Object of class \code{HARModel}. see \link{HARModel} }
+    \item{\code{forecast}:}{Object of class \code{matrix} containing the forecasted series}
+    \item{\code{info}:}{Object of class \code{list} cointaining:}
+    \itemize{\item{\code{elapsedTime}:} Object of class \code{difftime} containing the time elapsed in seconds
+    \item{\code{rolls}:} \code{Integer}  containing the amount of rolls done in the forecasting routine
+    \item{\code{horizon}:} \code{Integer} containing the length of the horizon used for forecasting during each of the rolls}
+    \item{\code{data}:}{Object of class \code{list} containing:}
+    \itemize{\item{\code{dates}:}Object of type \code{Integer} or \code{Date} containing the indices of the forecasted series either in integer or date format
+    \item{\code{observations}:}Object of type \code{numeric} or \code{xts} containing the in-sample observations
+    \item{\code{forecastComparison}:} Object of type \code{numeric} or \code{xts} containing the observations kept out of sample for the first roll
     }
     }
 }

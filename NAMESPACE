@@ -8,7 +8,8 @@ importFrom("grDevices", "dev.interactive")
 importFrom("graphics", "panel.smooth", "par", "plot", "points" , "legend" , "lines")
 importFrom("stats", "lm", "residuals", "rnorm" , "dt" , "sd")
 importFrom("sandwich" , "NeweyWest")
-export(HARestimate, HARforecast, HARsimulate)
+export(HARForecast, HARSimulate, HAREstimate)
 exportClasses("HARModel" ,"HARForecast", "HARSim")
-exportMethods("show" , "plot" , "coef", "uncmean" , "SandwichNeweyWest", "forc" , "forecastres", "qlike", "summary", "logLik", "confint", "residuals")
+exportMethods("show" , "plot" , "coef", "uncmean" , "sandwichNeweyWest", "getForc" , "forecastRes", 
+              "qlike", "summary", "logLik", "confint", "residuals", "fitted.values")
 

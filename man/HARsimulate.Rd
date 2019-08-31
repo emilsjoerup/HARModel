@@ -1,5 +1,5 @@
-\name{HARsimulate}
-\alias{HARsimulate}
+\name{HARSimulate}
+\alias{HARSimulate}
 \title{
 HAR simulation
 }
@@ -7,21 +7,21 @@ HAR simulation
 Simulates a HAR model. From using the AR representation of the HAR model.
 }
 \usage{
-HARsimulate(iLength=1500, periods = c(1, 5, 22), 
-coef = c(0.01, 0.36 ,0.28 , 0.28), Sigma = 0.001)
+HARSimulate(len=1500, periods = c(1, 5, 22), 
+            coef = c(0.01, 0.36 ,0.28 , 0.28), errorTermSD = 0.001)
 }
 \arguments{
-  \item{iLength}{
-Integer length of the simulated process.
+  \item{len}{
+An \code{integer} determining the length of the simulated process.
 }
   \item{periods}{
-Vector of lags for constructing the model, standard is c(1,5,22) which is in line with Corsi(2009)
+A \code{numeric} of lags for constructing the model, standard is c(1,5,22).
 }
   \item{coef}{
-Coefficient vector which will be used to simulate the process. 
+A \code{numeric} of coefficients which will be used to simulate the process. 
 }
-  \item{Sigma}{
-Standard deviation of the error term.
+  \item{errorTermSD}{
+A \code{numeric} determining the standard deviation of the error term.
 }
 
 }
@@ -38,9 +38,9 @@ Emil Sjoerup
 \examples{
 set.seed(123)
 #Simulate the process of size 10000
-HARSim = HARsimulate(iLength=10000, periods = c(1, 5, 22),
-coef = c(0.01, 0.36, 0.28, 0.28), Sigma = 0.001)
-HARFit = HARestimate(HARSim@Simulation, periods = c(1, 5, 22))
+HARSim = HARSimulate(len = 10000, periods = c(1, 5, 22),
+                     coef = c(0.01, 0.36, 0.28, 0.28), errorTermSD = 0.001)
+HARFit = HAREstimate(HARSim@simulation, periods = c(1, 5, 22))
 
 }
 \keyword{ HAR }

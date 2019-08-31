@@ -14,14 +14,14 @@ Class for HARSim object
 \section{Objects from the Class}{A virtual Class: No objects may be created from it}
 \section{Slots}{
   \describe{
-    \item{\code{Simulation}:}{Object of class \code{numeric} containing the simulated series}
-    \item{\code{Info}:}{Object of class \code{list} cointaining:}
+    \item{\code{simulation}:}{Object of class \code{numeric} containing the simulated series}
+    \item{\code{info}:}{Object of class \code{list} cointaining:}
     \itemize{
-    \item{\code{Length}:} Object of class \code{numeric}  containing the length of the simulated series
-    \item{\code{Lags}:} Object of class \code{numeric} containing the lag-vector used for simulation
-    \item{\code{Coefficients}:} Object of class \code{numeric} containing the coefficients used for simulation
-    \item{\code{ErrorTermSD}:} Object of class \code{numeric} containing the standard error of the error term
-    \item{\code{Elapsed Time}:} Object of class \code{difftime} containing the time elapsed in seconds}
+    \item{\code{len}:} Object of class \code{numeric}  containing the length of the simulated series
+    \item{\code{periods}:} Object of class \code{numeric} containing the lag-vector used for simulation
+    \item{\code{coefficients}:} Object of class \code{numeric} containing the coefficients used for simulation
+    \item{\code{errorTermSD}:} Object of class \code{numeric} containing the standard error of the error term
+    \item{\code{elapsedTime}:} Object of class \code{difftime} containing the time elapsed in seconds}
     }
 }
 
