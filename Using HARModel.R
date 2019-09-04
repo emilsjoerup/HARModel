@@ -9,103 +9,109 @@ SP500rq = SP500RM$RQ
 SP500bpv = SP500RM$BPV
 
 #######################Estimation#######################
-FitHAR = HAREstimate(as.vector(SP500rv), periods = c(1,5,22))
+HARFit = HAREstimate(SP500rv, periods = c(1,5,22))
 
-FitCHAR = HAREstimate(SP500rv, BPV = SP500bpv, periods = c(1,5,22), type = "CHAR")
+CHARFit = HAREstimate(SP500rv, BPV = SP500bpv, periods = c(1,5,22), type = "CHAR")
 
-FitCHARQ = HAREstimate(SP500rv, BPV = SP500bpv, RQ = SP500rq, periods = c(1,5,22), periodsRQ = c(1), type = "CHARQ")
+CHARQFit = HAREstimate(SP500rv, BPV = SP500bpv, RQ = SP500rq, 
+                       periods = c(1,5,22), periodsRQ = c(1), type = "CHARQ")
 
-FitHARJ = HAREstimate(RM = SP500rv, BPV = SP500bpv,
-                       periods = c(1,5,22), periodsJ = c(1),  type = "HARJ" )
+HARJFit = HAREstimate(RM = SP500rv, BPV = SP500bpv, 
+                      periods = c(1,5,22), periodsJ = c(1),  type = "HARJ" )
 
+HARQFit = HAREstimate(RM = SP500rv, RQ = SP500rq, 
+                      periods = c(1,5,22 ), periodsRQ = c(1),  type = "HARQ")
 
-FitHARQ = HAREstimate(RM = SP500rv, RQ = SP500rq, periods = c(1,5,22 ), 
-                       periodsRQ = c(1),  type = "HARQ")
+FullHARQFit = HAREstimate(RM = SP500rv, RQ = SP500rq,
+                          periods = c(1,5,22 ), periodsRQ = c(1,5,22), type = "HARQ")
 
-FitFullHARQ = HAREstimate(RM = SP500rv, RQ = SP500rq, periods = c(1,5,22 ),
-                       periodsRQ = c(1,5,22), type = "HARQ")
+HARQJFit = HAREstimate(RM = SP500rv, BPV = SP500bpv, RQ = SP500rq, 
+                       periods = c(1,5,22), periodsJ = c(1,5,22), 
+                       periodsRQ = c(1), type = "HARQ-J")
 
-FitHARQJ = HAREstimate(RM = SP500rv, BPV = SP500bpv, 
-                        RQ = SP500rq, periods = c(1,5,22),
-                        periodsJ = c(1,5,22), periodsRQ = c(1), type = "HARQ-J")
+FullHARQJFit = HAREstimate(RM = SP500rv, BPV = SP500bpv, RQ = SP500rq, 
+                           periods = c(1,5,22), periodsJ = c(1,5,22), 
+                           periodsRQ = c(1,5,22), type = "HARQ-J")
 
-FitFullHARQJ = HAREstimate(RM = SP500rv, BPV = SP500bpv, 
-                            RQ = SP500rq, periods = c(1,5,22),
-                            periodsJ = c(1,5,22), periodsRQ = c(1,5,22), type = "HARQ-J")
+plot(HARQFit)
 
-plot(FitCHARQ)
+summary(HARQFit) #Wrapper for the lm submodel
 
-summary(FitHAR)
+logLik(HARQFit) #Wrapper for the lm submodel
 
-logLik(FitHAR)
-
-confint(FitHAR)
+confint(HARQFit) #Wrapper for the lm submodel
 #Q-like:
-mean(qlike(FitHAR))
-mean(qlike(FitHARQ))
+mean(qlike(HARFit))
+mean(qlike(HARQFit))
 
 
 
 #######################Forecasting#######################
 
-ForcHAR = HARForecast(SP500rv, periods = c(1,5,22) ,nRoll = 3096, nAhead = 50, type = "HAR" )
-ForcHARI = HARForecast(SP500rv, periods = c(1,5,22) ,nRoll = 3096, 
-                       nAhead = 1, type = "HAR", windowType = "increasing" )
+HARForc = HARForecast(SP500rv, periods = c(1,5,22),
+                      nRoll = 3096, nAhead = 50, type = "HAR" )
 
+HARIForc = HARForecast(SP500rv, periods = c(1,5,22) ,
+                       nRoll = 3096, nAhead = 1, type = "HAR", windowType = "increasing" )
 
-ForcHARJ = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
-                            periodsJ = c(1) ,nRoll = 3096,
-                            nAhead = 50, type = "HARJ" )
-ForcHARJI = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
-                            periodsJ = c(1) ,nRoll = 3096,
-                            nAhead = 1, type = "HARJ", windowType = "increasing" )
+HARJForc = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
+                       periodsJ = c(1) ,nRoll = 3096, 
+                       nAhead = 50, type = "HARJ" )
 
-ForcFULLHARJ = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
-                            periodsJ = c(1,5,22) ,nRoll = 3096,
-                            nAhead = 1, type = "HARJ" )
-ForcHARQ = HARForecast(as.vector(SP500rv), RQ = SP500rq, periods = c(1,5,22), 
-                            periodsRQ = c(1), nRoll = 3096, nAhead = 1,
-                            type = "HARQ" )
+HARJIForc = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
+                        periodsJ = c(1) ,nRoll = 3096,nAhead = 1,
+                        type = "HARJ", windowType = "increasing" )
 
-ForcFULLHARQ = HARForecast(SP500rv, RQ= SP500rq, periods = c(1,5,22), 
-                            periodsRQ = c(1,5,22), nRoll = 3096, nAhead = 1,
-                            type = "HARQ" )
+FULLHARJForc = HARForecast(SP500rv, BPV = SP500bpv, periods = c(1,5,22),
+                           periodsJ = c(1,5,22) ,nRoll = 3096,nAhead = 1, type = "HARJ" )
 
-ForcHARQJ = HARForecast(as.numeric(SP500rv), RQ = SP500rq, BPV = SP500bpv,
-                             periods = c(1,5,22), periodsJ = c(1), 
-                             periodsRQ = c(1), nRoll = 3096,
-                             nAhead = 1, type = "HARQ-J" )
+HARQForc = HARForecast(SP500rv, RQ = SP500rq, periods = c(1,5,22),
+                       periodsRQ = c(1), nRoll = 3096, nAhead = 1,type = "HARQ" )
 
-ForcCHAR = HARForecast(as.numeric(SP500rv), RQ = SP500rq, BPV = SP500bpv,
-                             periods = c(1,5,22), periodsJ = c(1), 
-                             periodsRQ = c(1), nRoll = 3096,
-                             nAhead = 1, type = "CHAR" )
+FULLHARQForc = HARForecast(SP500rv, RQ= SP500rq, periods = c(1,5,22),
+                           periodsRQ = c(1,5,22),
+                           nRoll = 3096, nAhead = 1,type = "HARQ")
 
-ForcCHARQ = HARForecast(as.numeric(SP500rv), RQ = SP500rq, BPV = SP500bpv,
-                            periods = c(1,5,22), periodsJ = c(1), 
-                            periodsRQ = c(1), nRoll = 3096,
-                            nAhead = 1, type = "CHARQ" )
+HARQJForc = HARForecast(SP500rv, RQ = SP500rq, BPV = SP500bpv,
+                        periods = c(1,5,22), periodsJ = c(1), periodsRQ = c(1),
+                        nRoll = 3096,nAhead = 1, type = "HARQ-J")
+
+CHARForc = HARForecast(SP500rv, RQ = SP500rq, BPV = SP500bpv,
+                       periods = c(1,5,22), periodsJ = c(1), periodsRQ = c(1),
+                       nRoll = 3096,nAhead = 1, type = "CHAR")
+
+CHARQForc = HARForecast(SP500rv, RQ = SP500rq, BPV = SP500bpv,
+                        periods = c(1,5,22), periodsJ = c(1), periodsRQ = c(1),
+                        nRoll = 3096,nAhead = 1, type = "CHARQ")
+
+#Plot:
+plot(HARForc)
+
+#To get the forecasted series of a HARForecast object:
+forecast = getForc(HARForc)
+
+#To get the forecast residualse:
+forcRes = forecastRes(HARForc)
 
 ##Select loss functions from updated table 4 of BPQ:
 
-mean(forecastRes(ForcHAR)^2)/mean(forecastRes(ForcHAR)^2)
-mean(forecastRes(ForcHARJ)^2)/mean(forecastRes(ForcHAR)^2)
-mean(forecastRes(ForcCHAR)^2)/mean(forecastRes(ForcHAR)^2)
+mean(forecastRes(HARJForc)^2)/mean(forecastRes(HARForc)^2)
+mean(forecastRes(HARQForc)^2)/mean(forecastRes(HARForc)^2)
+mean(forecastRes(CHARForc)^2)/mean(forecastRes(HARForc)^2)
 
 
-mean(qlike(ForcHAR))/mean(qlike(ForcHAR))
-mean(qlike(ForcHARJ))/mean(qlike(ForcHAR))
-mean(qlike(ForcCHAR))/mean(qlike(ForcHAR))
+mean(qlike(HARJForc))/mean(qlike(HARForc))
+mean(qlike(HARQForc))/mean(qlike(HARForc))#Slightly different from BPQ due to how I do the averaging vs how they do it (Both schemes make sense!)
+mean(qlike(CHARForc))/mean(qlike(HARForc))
 
 
 #######################Simulation#######################
-
 set.seed(123)
 lSim = HARSimulate(len = 4.5e4,  periods = c(1,5,22),
                    coef = c(0.1, 0.38, 0.28, 0.28), errorTermSD = 0.01)
 
 plot(lSim)
 
-FitSim = HAREstimate(lSim@Simulation, periods = c(1,5,22))
+FitSim = HAREstimate(lSim@simulation, periods = c(1,5,22))
 
 plot(FitSim)
